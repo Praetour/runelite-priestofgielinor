@@ -410,7 +410,6 @@ public class VowSelectionService
 
         boolean ritualPending = false;
         int gained = 0;
-        VowDefinition retired = null;
         List<VowSelection> snapshot = new ArrayList<>(hiddenCards);
 
         if (vow.getType() == VowType.GOD)
@@ -423,7 +422,7 @@ public class VowSelectionService
             {
                 return;
             }
-            retired = storageService.swapActiveMajorVow(vow);
+            storageService.setActiveMajorVow(vow);
             storageService.completeVow(vow);
             gained = pointsFor(vow);
             storageService.addPoints(gained);
@@ -432,12 +431,7 @@ public class VowSelectionService
         {
             if (VowRegistry.isMajorFillerId(vow.getId()))
             {
-                retired = storageService.swapActiveMajorVow(vow);
-            }
-            else
-            {
-                // Minor permanents stack forever; completing one is enough to keep it enforced.
-                storageService.setActivePermanentVow(storageService.getActivePermanentVow());
+                storageService.setActiveMajorVow(vow);
             }
             storageService.completeVow(vow);
             gained = pointsFor(vow);
@@ -464,11 +458,7 @@ public class VowSelectionService
             }
             else
             {
-                reveal = "VowTaker: took \"" + vow.getName() + "\" (+" + gained + " pts).";
-            }
-            if (retired != null)
-            {
-                reveal += " \"" + retired.getName() + "\" is lifted and will never be offered again.";
+                reveal = "VowTaker: sworn \"" + vow.getName() + "\" (+" + gained + " pts). It binds you permanently.";
             }
             StringBuilder passed = new StringBuilder();
             for (VowSelection s : snapshot)
@@ -586,10 +576,10 @@ public class VowSelectionService
         storageService.setSelectedGod(god);
     }
 
-    /** Majors are a single forced card; minors are a choice of three, so they keep player agency. */
+    /** Every draw offers three, so a brutal roll always leaves two alternatives before re-rolling. */
     private static int cardCountFor(DrawMode mode)
     {
-        return mode == DrawMode.MAJOR_REVEALED || mode == DrawMode.GOD_ONLY ? 1 : 3;
+        return 3;
     }
 
     private void buildHiddenCards(DrawMode mode)

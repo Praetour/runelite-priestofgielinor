@@ -276,22 +276,16 @@ public class VowEnforcementService
     {
     }
 
-    /** Returns the name of the active vow that forbids this menu action, or null. */
+    /** Returns the name of a sworn vow that forbids this menu action, or null. */
     private String findActiveVowBlocking(String option, String target)
     {
-        // Item blocklist pass. Tag restrictions come from every vow ever sworn, since picks
-        // accumulate — unlike the behaviour gates below, narrowing gear stacks safely.
         String tagged = findTagBlocking(option, target);
         if (tagged != null) return tagged;
 
-        VowDefinition perm = storageService.getActivePermanentVow();
-        if (perm != null)
+        // Every vow ever sworn stays in force, so each one gets a say.
+        for (VowDefinition vow : swornVows())
         {
-            String id = perm.getId();
-            if ("no_teleport_spells".equals(id) && isTeleportSpellCast(option, target)) return perm.getName();
-            if ("no_poh_teleports".equals(id) && isPohTeleport(option, target)) return perm.getName();
-            if ("no_prayer_book".equals(id) && isPrayerAction(option, target)) return perm.getName();
-            if ("no_damage_boosting_prayers".equals(id) && option.equals("activate") && isDamagePrayerName(target)) return perm.getName();
+            if (blocksByRule(vow, option, target)) return vow.getName();
         }
 
         // Rank-locked gear ceiling: cannot equip gear above the tier your devotion rank has unlocked.
@@ -315,71 +309,71 @@ public class VowEnforcementService
             return ritual != null ? "Ritual in progress: " + ritual.getName() : "Ritual in progress";
         }
 
-        // God-aligned combat gates: hide Attack on NPCs when the vow's precondition isn't met.
-        VowDefinition god = storageService.getActiveGodVow();
-        if (god != null && isAttackAction(option))
-        {
-            String id = god.getId();
-            if ("mark_of_blood".equals(id) && !hasRawMeat()) return god.getName();
-            if ("keeper_of_balance".equals(id) && !isWeightInRange(10, 20)) return god.getName();
-            if ("apostle_zamorak".equals(id) && !citizenCreditReady && !isCitizen(target)) return god.getName();
-            if ("apostle_saradomin".equals(id) && client.getBoostedSkillLevel(Skill.PRAYER) < 20) return god.getName();
-            if ("shieldbearer_of_light".equals(id) && !isShieldEquipped()) return god.getName();
-            if ("chaos_tethered".equals(id) && client.getEnergy() >= 5000) return god.getName();
-            if ("skybound".equals(id) && client.getEnergy() < 5000) return god.getName();
-            if ("apostle_armadyl".equals(id) && !isRangedWeaponEquipped() && !isInCombat()) return god.getName();
-            if ("apostle_guthix".equals(id) && !hasChangedStyleSinceLastExit()) return god.getName();
-            if ("apostle_bandos".equals(id) && !isMeleeWeaponEquipped()) return god.getName();
-            if ("shadow_marked".equals(id) && !hasRecentArceuusKill()) return god.getName();
-        }
-
-        // Equilibrium Seeker: block toggling any offensive/defensive prayer (overheads are allowed).
-        if (god != null && "equilibrium_seeker".equals(god.getId())
-            && option.equals("activate") && isBoostPrayerName(target))
-        {
-            return god.getName();
-        }
-
-        // Apostle of Zaros: only Ancient spellbook casts allowed.
-        if (god != null && "apostle_zaros".equals(god.getId())
-            && option.equals("cast") && !isOnAncientSpellbook())
-        {
-            return god.getName();
-        }
-
-        // Berserker of Bandos: no eating while an enemy targets us.
-        if (god != null && "berserker_of_bandos".equals(god.getId())
-            && option.equals("eat") && isInCombat())
-        {
-            return god.getName();
-        }
-
-        // Windwalker (Armadyl): no metal chest/leg armour.
-        if (god != null && "windwalker".equals(god.getId()) && isEquipAction(option)
-            && isMetalChestOrLegs(target))
-        {
-            return god.getName();
-        }
-
-        // Brute of Bandos: no chest armour above tier 30 (heuristic: block anything not iron/leather/bronze).
-        if (god != null && "brute_of_bandos".equals(god.getId()) && isEquipAction(option)
-            && matchesSlot(target, "chest") && !isLowTierChest(target))
-        {
-            return god.getName();
-        }
-
-        // Fatebound's leash needs the destination tile, so it's handled in isEntryBlocked instead.
-
-        // Auto-retaliate lock (active only while a god vow is sworn — god vows all gate combat
-        // and auto-retaliate is the obvious way to bypass those gates via aggressive NPCs).
-        // If it's currently OFF (varp == 1) we hide the toggle so it stays off; if it's currently
-        // ON (varp == 0) we leave the toggle exposed so the player can still disable it.
-        if (god != null && option.equals("auto retaliate")
+        // Auto-retaliate lock: god vows gate combat, and auto-retaliate is the obvious way to
+        // bypass those gates via aggressive NPCs. Only hide the toggle while it is already OFF.
+        if (storageService.getActiveGodVow() != null && option.equals("auto retaliate")
             && client.getVarpValue(AUTO_RETALIATE_VARP) == 1)
         {
             return "Auto-Retaliate Lock";
         }
         return null;
+    }
+
+    /** Per-vow behaviour rules that can't be expressed as an item tag. */
+    private boolean blocksByRule(VowDefinition vow, String option, String target)
+    {
+        switch (vow.getId())
+        {
+            // Travel and prayer restrictions.
+            case "no_teleport_spells":
+                return isTeleportSpellCast(option, target);
+            case "no_poh_teleports":
+                return isPohTeleport(option, target);
+            case "no_prayer_book":
+                return isPrayerAction(option, target);
+            case "no_damage_boosting_prayers":
+                return option.equals("activate") && isDamagePrayerName(target);
+
+            // Combat preconditions, checked when trying to attack.
+            case "mark_of_blood":
+                return isAttackAction(option) && !hasRawMeat();
+            case "keeper_of_balance":
+                return isAttackAction(option) && !isWeightInRange(10, 20);
+            case "apostle_zamorak":
+                return isAttackAction(option) && !citizenCreditReady && !isCitizen(target);
+            case "apostle_saradomin":
+                return isAttackAction(option) && client.getBoostedSkillLevel(Skill.PRAYER) < 20;
+            case "shieldbearer_of_light":
+                return isAttackAction(option) && !isShieldEquipped();
+            case "chaos_tethered":
+                return isAttackAction(option) && client.getEnergy() >= 5000;
+            case "skybound":
+                return isAttackAction(option) && client.getEnergy() < 5000;
+            case "apostle_armadyl":
+                return isAttackAction(option) && !isRangedWeaponEquipped() && !isInCombat();
+            case "apostle_guthix":
+                return isAttackAction(option) && !hasChangedStyleSinceLastExit();
+            case "apostle_bandos":
+                return isAttackAction(option) && !isMeleeWeaponEquipped();
+            case "shadow_marked":
+                return isAttackAction(option) && !hasRecentArceuusKill();
+
+            // Style and gear rules.
+            case "equilibrium_seeker":
+                return option.equals("activate") && isBoostPrayerName(target);
+            case "apostle_zaros":
+                return option.equals("cast") && !isOnAncientSpellbook();
+            case "berserker_of_bandos":
+                return option.equals("eat") && isInCombat();
+            case "windwalker":
+                return isEquipAction(option) && isMetalChestOrLegs(target);
+            case "brute_of_bandos":
+                return isEquipAction(option) && matchesSlot(target, "chest") && !isLowTierChest(target);
+
+            // Fatebound's leash needs the destination tile, so it lives in findFateboundBlocking.
+            default:
+                return false;
+        }
     }
 
     /**
@@ -391,8 +385,16 @@ public class VowEnforcementService
         if (fateboundTarget == null || entry == null) return null;
         if (!option.equals("walk here") || entry.getType() != net.runelite.api.MenuAction.WALK) return null;
 
-        VowDefinition god = storageService.getActiveGodVow();
-        if (god == null || !"fatebound".equals(god.getId())) return null;
+        VowDefinition god = null;
+        for (VowDefinition vow : swornVows())
+        {
+            if ("fatebound".equals(vow.getId()))
+            {
+                god = vow;
+                break;
+            }
+        }
+        if (god == null) return null;
 
         WorldPoint enemy = fateboundTarget.getWorldLocation();
         if (enemy == null) return null;

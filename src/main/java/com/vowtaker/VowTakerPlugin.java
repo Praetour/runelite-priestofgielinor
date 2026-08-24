@@ -455,12 +455,6 @@ public class VowTakerPlugin extends Plugin
         }
 
         storageService.initializeSession(name);
-        String adopted = storageService.consumeAdoptedLegacySave();
-        if (adopted != null)
-        {
-            client.addChatMessage(net.runelite.api.ChatMessageType.GAMEMESSAGE, "",
-                "VowTaker: imported your previous progress from " + adopted + ".", null);
-        }
         client.addChatMessage(net.runelite.api.ChatMessageType.GAMEMESSAGE, "",
             "VowTaker: profile loaded for " + name.trim() + ".", null);
         // Re-evaluate here so a save that was left eligible-but-unpromoted corrects itself.

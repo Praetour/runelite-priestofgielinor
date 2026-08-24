@@ -73,59 +73,7 @@ public class VowStorageService
         // A random key here would mint a brand-new empty save on every launch, because the client
         // isn't logged in yet when the plugin starts. Fall back to a stable shared key instead.
         sessionKey = key.isEmpty() ? "default" : sanitiseKey(key);
-        adoptLegacySaveIfNeeded();
         load();
-    }
-
-    /** True when a save file already exists for the current session key. */
-    private boolean saveExists()
-    {
-        try
-        {
-            return resolveDirectory().resolve(sessionKey + "_" + STORAGE_FILE).toFile().exists();
-        }
-        catch (IOException e)
-        {
-            return false;
-        }
-    }
-
-    /**
-     * One-time rescue for progress stranded under the old random per-launch keys: if this account
-     * has no save yet, adopt the most recently written {@code local-*} file.
-     */
-    private void adoptLegacySaveIfNeeded()
-    {
-        if (saveExists()) return;
-        try
-        {
-            Path dir = resolveDirectory();
-            File newest = null;
-            File[] files = dir.toFile().listFiles((d, name) ->
-                name.startsWith("local-") && name.endsWith("_" + STORAGE_FILE));
-            if (files == null) return;
-            for (File f : files)
-            {
-                if (newest == null || f.lastModified() > newest.lastModified()) newest = f;
-            }
-            if (newest != null)
-            {
-                Files.copy(newest.toPath(), dir.resolve(sessionKey + "_" + STORAGE_FILE));
-                adoptedLegacySave = newest.getName();
-            }
-        }
-        catch (IOException ignored)
-        {
-            // Migration is best-effort; a fresh profile is an acceptable outcome.
-        }
-    }
-
-    /** Name of the legacy file adopted on this run, or null. Consumed once by the plugin. */
-    public String consumeAdoptedLegacySave()
-    {
-        String s = adoptedLegacySave;
-        adoptedLegacySave = null;
-        return s;
     }
 
     private static String sanitiseKey(String raw)
@@ -685,24 +633,30 @@ public class VowStorageService
     }
 
     /**
-     * Vows currently binding you: every minor permanent ever taken, plus the single live Major.
-     * Retired Majors stop being enforced but stay completed so they never re-enter the draw pool.
+     * Every god, major and minor vow ever sworn. All of them bind permanently and stay enforced;
+     * only rituals are transient. Order puts majors first so UI listings group naturally.
      */
     public List<VowDefinition> getSwornVows()
     {
-        List<VowDefinition> out = new ArrayList<>();
+        List<VowDefinition> majors = new ArrayList<>();
+        List<VowDefinition> minors = new ArrayList<>();
+        for (String id : completedGodVows)
+        {
+            VowDefinition v = VowRegistry.getById(id);
+            if (v != null) majors.add(v);
+        }
         for (String id : completedPermanentVows)
         {
-            if (VowRegistry.isMajorFillerId(id)) continue;
             VowDefinition v = VowRegistry.getById(id);
-            if (v != null) out.add(v);
+            if (v == null) continue;
+            if (VowRegistry.isMajorFillerId(id)) majors.add(v);
+            else minors.add(v);
         }
-        VowDefinition major = getActiveMajorVow();
-        if (major != null) out.add(major);
-        return out;
+        majors.addAll(minors);
+        return majors;
     }
 
-    /** The one Major (god vow or heavy permanent) currently in force, or null. */
+    /** Most recent god vow, kept only for overlay/panel headline display. */
     public VowDefinition getActiveMajorVow()
     {
         if (activeGodVow != null) return activeGodVow;
@@ -713,39 +667,19 @@ public class VowStorageService
         return null;
     }
 
-    /**
-     * Swap in a new Major, retiring whatever was worn before it.
-     *
-     * @return the retired vow, or null if this is the player's first Major
-     */
-    public VowDefinition swapActiveMajorVow(VowDefinition incoming)
+    /** Records the newest major for display. Nothing is retired: every vow sworn stays sworn. */
+    public void setActiveMajorVow(VowDefinition incoming)
     {
-        VowDefinition previous = getActiveMajorVow();
-        if (previous != null && !previous.getId().equals(incoming == null ? null : incoming.getId()))
+        if (incoming == null) return;
+        if (incoming.getType() == VowType.GOD)
         {
-            retiredMajorVows.add(previous.getId());
+            activeGodVow = incoming;
         }
-
-        activeGodVow = null;
-        activePermanentVow = null;
-        if (incoming != null)
+        else
         {
-            if (incoming.getType() == VowType.GOD)
-            {
-                activeGodVow = incoming;
-            }
-            else
-            {
-                activePermanentVow = incoming;
-            }
+            activePermanentVow = incoming;
         }
         save();
-        return previous == null || previous.equals(incoming) ? null : previous;
-    }
-
-    public Set<String> getRetiredMajorVows()
-    {
-        return Collections.unmodifiableSet(retiredMajorVows);
     }
 
     public void setSelectionOpen(boolean selectionOpen)

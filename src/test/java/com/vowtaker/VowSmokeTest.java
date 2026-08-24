@@ -249,6 +249,77 @@ class VowSmokeTest
     }
 
     @Test
+    void everyVowStaysSwornAndEnforced(@TempDir Path tempDir) throws Exception
+    {
+        VowStorageService storage = createStorage(tempDir);
+        VowSelectionService selection = createSelectionService(storage);
+        storage.setSelectedGod(GodAlignment.ZAMORAK);
+
+        assertTrue(selection.applySelection("mark_of_blood"));
+        assertTrue(selection.applySelection("chaos_tethered"));
+        assertTrue(selection.applySelection("no_teleport_spells"));
+
+        // Taking a second major must not displace the first: nothing is ever retired.
+        java.util.List<String> sworn = new java.util.ArrayList<>();
+        for (VowDefinition v : storage.getSwornVows()) sworn.add(v.getId());
+
+        assertTrue(sworn.contains("mark_of_blood"));
+        assertTrue(sworn.contains("chaos_tethered"));
+        assertTrue(sworn.contains("no_teleport_spells"));
+        assertEquals(3, sworn.size());
+    }
+
+    @Test
+    void swornListPutsMajorsBeforeMinors(@TempDir Path tempDir) throws Exception
+    {
+        VowStorageService storage = createStorage(tempDir);
+        VowSelectionService selection = createSelectionService(storage);
+        storage.setSelectedGod(GodAlignment.ZAMORAK);
+
+        assertTrue(selection.applySelection("no_teleport_spells"));
+        assertTrue(selection.applySelection("mark_of_blood"));
+
+        java.util.List<VowDefinition> sworn = storage.getSwornVows();
+        assertTrue(VowRegistry.isMajor(sworn.get(0)));
+        assertFalse(VowRegistry.isMajor(sworn.get(sworn.size() - 1)));
+    }
+
+    @Test
+    void everyDrawOffersThreeCards(@TempDir Path tempDir) throws Exception
+    {
+        VowStorageService storage = createStorage(tempDir);
+        VowSelectionService selection = createSelectionService(storage);
+        storage.setSelectedGod(GodAlignment.SARADOMIN);
+
+        selection.forceOpenSelection(VowSelectionService.DrawMode.MAJOR_REVEALED);
+        assertEquals(3, selection.getHiddenCards().size());
+        selection.applySelection(selection.getHiddenCards().get(0).getVow().getId());
+
+        selection.forceOpenSelection(VowSelectionService.DrawMode.MINOR);
+        assertEquals(3, selection.getHiddenCards().size());
+    }
+
+    @Test
+    void resetClearsEverything(@TempDir Path tempDir) throws Exception
+    {
+        VowStorageService storage = createStorage(tempDir);
+        VowSelectionService selection = createSelectionService(storage);
+        storage.setSelectedGod(GodAlignment.ZAMORAK);
+        selection.applySelection("mark_of_blood");
+        storage.completeTask("kill_chicken");
+        storage.addPoints(40);
+
+        storage.resetAll();
+
+        assertEquals(0, storage.getTotalPoints());
+        assertEquals(GodAlignment.NONE, storage.getSelectedGod());
+        assertEquals(com.vowtaker.model.Rank.NONE, storage.getCurrentRank());
+        assertTrue(storage.getSwornVows().isEmpty());
+        assertTrue(storage.getCompletedTaskIds().isEmpty());
+        assertEquals(0, storage.getHighestQuartileFired());
+    }
+
+    @Test
     void versionCompareNeverTriggersADowngrade()
     {
         assertTrue(com.vowtaker.update.VowTakerUpdater.compareVersions("1.0.1", "1.0.0") > 0);
@@ -263,58 +334,6 @@ class VowSmokeTest
     }
 
     @Test
-    void swearingAMajorRetiresThePreviousOne(@TempDir Path tempDir) throws Exception
-    {
-        VowStorageService storage = createStorage(tempDir);
-        VowSelectionService selection = createSelectionService(storage);
-        storage.setSelectedGod(GodAlignment.ZAMORAK);
-
-        assertTrue(selection.applySelection("mark_of_blood"));
-        assertEquals("mark_of_blood", storage.getActiveMajorVow().getId());
-        assertTrue(storage.getSwornVows().stream().anyMatch(v -> "mark_of_blood".equals(v.getId())));
-
-        assertTrue(selection.applySelection("chaos_tethered"));
-        assertEquals("chaos_tethered", storage.getActiveMajorVow().getId());
-        // The old Major stops binding you but stays completed so it can never be drawn again.
-        assertTrue(storage.getRetiredMajorVows().contains("mark_of_blood"));
-        assertTrue(storage.getSwornVows().stream().noneMatch(v -> "mark_of_blood".equals(v.getId())));
-        assertTrue(storage.isCompleted(VowRegistry.getById("mark_of_blood")));
-    }
-
-    @Test
-    void minorVowsKeepStacking(@TempDir Path tempDir) throws Exception
-    {
-        VowStorageService storage = createStorage(tempDir);
-        VowSelectionService selection = createSelectionService(storage);
-        storage.setSelectedGod(GodAlignment.ZAMORAK);
-
-        assertTrue(selection.applySelection("no_teleport_spells"));
-        assertTrue(selection.applySelection("no_fairy_rings"));
-
-        assertTrue(storage.getSwornVows().stream().anyMatch(v -> "no_teleport_spells".equals(v.getId())));
-        assertTrue(storage.getSwornVows().stream().anyMatch(v -> "no_fairy_rings".equals(v.getId())));
-        assertTrue(storage.getRetiredMajorVows().isEmpty());
-    }
-
-    @Test
-    void majorPickerOffersOneCardAndMinorOffersThree(@TempDir Path tempDir) throws Exception
-    {
-        VowStorageService storage = createStorage(tempDir);
-        VowSelectionService selection = createSelectionService(storage);
-        storage.setSelectedGod(GodAlignment.SARADOMIN);
-
-        selection.forceOpenSelection(VowSelectionService.DrawMode.MAJOR_REVEALED);
-        assertTrue(selection.hasPendingSelection());
-        assertEquals(1, selection.getHiddenCards().size());
-
-        selection.applySelection(selection.getHiddenCards().get(0).getVow().getId());
-
-        selection.forceOpenSelection(VowSelectionService.DrawMode.MINOR);
-        assertTrue(selection.hasPendingSelection());
-        assertEquals(3, selection.getHiddenCards().size());
-    }
-
-    @Test
     void rerollSpendsATokenAndChangesTheOffer(@TempDir Path tempDir) throws Exception
     {
         VowStorageService storage = createStorage(tempDir);
@@ -322,13 +341,17 @@ class VowSmokeTest
         storage.setSelectedGod(GodAlignment.SARADOMIN);
 
         selection.forceOpenSelection(VowSelectionService.DrawMode.MAJOR_REVEALED);
-        String before = selection.getHiddenCards().get(0).getVow().getId();
+        java.util.Set<String> before = new java.util.HashSet<>();
+        for (com.vowtaker.model.VowSelection s : selection.getHiddenCards()) before.add(s.getVow().getId());
+
         int tokens = storage.getRerollTokens();
         assertTrue(tokens > 0);
-
         assertTrue(selection.rerollSelection());
         assertEquals(tokens - 1, storage.getRerollTokens());
-        assertEquals(1, selection.getHiddenCards().size());
-        assertFalse(before.equals(selection.getHiddenCards().get(0).getVow().getId()));
+        assertEquals(3, selection.getHiddenCards().size());
+
+        java.util.Set<String> after = new java.util.HashSet<>();
+        for (com.vowtaker.model.VowSelection s : selection.getHiddenCards()) after.add(s.getVow().getId());
+        assertFalse(before.equals(after));
     }
 }

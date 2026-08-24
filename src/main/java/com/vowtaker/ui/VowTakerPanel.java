@@ -401,13 +401,8 @@ public class VowTakerPanel extends PluginPanel
             p.add(compactRow("Tier tasks", String.valueOf(tierTaskCount), Color.LIGHT_GRAY));
 
             VowDefinition godVow = storage.getActiveMajorVow();
-            p.add(compactRow("Major vow", godVow == null ? "none" : godVow.getName(), Color.LIGHT_GRAY));
-
-            int retired = storage.getRetiredMajorVows().size();
-            if (retired > 0)
-            {
-                p.add(compactRow("Retired majors", String.valueOf(retired), new Color(160, 140, 120)));
-            }
+            p.add(compactRow("Latest major", godVow == null ? "none" : godVow.getName(), Color.LIGHT_GRAY));
+            p.add(compactRow("Vows sworn", String.valueOf(storage.getSwornVows().size()), new Color(220, 200, 140)));
 
             TaskDefinition milestone = TaskRegistry.milestoneFor(rank);
             if (milestone != null)
@@ -643,9 +638,53 @@ public class VowTakerPanel extends PluginPanel
 
         private JComponent buildVows()
         {
-            // Only surface vows the player has actively taken. Locked-in choices stay visible; the
-            // rest of the registry is intentionally hidden so the tab reflects the player's oath sheet.
-            return wrapScroll(vowList(v -> isActive(v) || storage.isCompleted(v)));
+            JPanel list = new JPanel();
+            list.setLayout(new BoxLayout(list, BoxLayout.Y_AXIS));
+            list.setBackground(ColorScheme.DARK_GRAY_COLOR);
+            list.setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
+
+            List<VowDefinition> sworn = storage.getSwornVows();
+            List<VowDefinition> majors = new java.util.ArrayList<>();
+            List<VowDefinition> minors = new java.util.ArrayList<>();
+            for (VowDefinition v : sworn)
+            {
+                if (VowRegistry.isMajor(v)) majors.add(v);
+                else minors.add(v);
+            }
+
+            addVowSection(list, "God & Major Vows", majors,
+                "No god or major vows sworn yet.");
+            addVowSection(list, "Minor Vows", minors,
+                "No minor vows sworn yet.");
+
+            if (majors.isEmpty() && minors.isEmpty())
+            {
+                JLabel empty = new JLabel("<html><body style='width:170px'>No vows sworn yet. When a card picker "
+                    + "opens in-game, whatever you choose is added here permanently.</body></html>");
+                empty.setForeground(Color.GRAY);
+                empty.setFont(FontManager.getRunescapeSmallFont());
+                list.add(empty);
+            }
+
+            return wrapScroll(list);
+        }
+
+        private void addVowSection(JPanel list, String title, List<VowDefinition> vows, String emptyText)
+        {
+            if (vows.isEmpty()) return;
+
+            JLabel header = new JLabel(title + "  (" + vows.size() + ")");
+            header.setForeground(ColorScheme.BRAND_ORANGE);
+            header.setFont(FontManager.getRunescapeBoldFont());
+            header.setBorder(BorderFactory.createEmptyBorder(6, 0, 4, 0));
+            header.setAlignmentX(Component.LEFT_ALIGNMENT);
+            list.add(header);
+
+            for (VowDefinition v : vows)
+            {
+                list.add(buildVowRow(v));
+                list.add(Box.createVerticalStrut(4));
+            }
         }
 
         private JComponent buildRituals()
@@ -687,18 +726,23 @@ public class VowTakerPanel extends PluginPanel
         {
             boolean completed = storage.isCompleted(v);
             boolean active = isActive(v);
+            boolean ritual = v.getType() == VowType.RITUAL;
+            // Everything except a ritual binds permanently once taken.
+            boolean sworn = completed && !ritual;
 
             JPanel row = new JPanel(new BorderLayout());
             row.setBackground(ColorScheme.DARKER_GRAY_COLOR);
             row.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(active ? ColorScheme.BRAND_ORANGE : ColorScheme.MEDIUM_GRAY_COLOR, 1),
+                BorderFactory.createLineBorder(sworn ? new Color(200, 140, 50)
+                    : (active ? ColorScheme.BRAND_ORANGE : ColorScheme.MEDIUM_GRAY_COLOR), 1),
                 BorderFactory.createEmptyBorder(4, 6, 4, 6)));
+            row.setAlignmentX(Component.LEFT_ALIGNMENT);
 
             JPanel left = new JPanel();
             left.setLayout(new BoxLayout(left, BoxLayout.Y_AXIS));
             left.setBackground(ColorScheme.DARKER_GRAY_COLOR);
             JLabel name = new JLabel(v.getName());
-            name.setForeground(active ? ColorScheme.BRAND_ORANGE : (completed ? Color.GRAY : Color.WHITE));
+            name.setForeground(sworn ? new Color(240, 200, 90) : (active ? ColorScheme.BRAND_ORANGE : Color.WHITE));
             name.setFont(FontManager.getRunescapeSmallFont());
             JLabel desc = new JLabel("<html><body style='width:135px'>" + v.getDescription() + "</body></html>");
             desc.setForeground(Color.LIGHT_GRAY);
@@ -709,15 +753,20 @@ public class VowTakerPanel extends PluginPanel
 
             String status;
             Color statusColor;
-            if (active)
+            if (sworn)
             {
-                status = "Active";
-                statusColor = ColorScheme.BRAND_ORANGE;
+                status = "Sworn";
+                statusColor = new Color(240, 200, 90);
             }
-            else if (completed)
+            else if (ritual && completed)
             {
                 status = "Done";
-                statusColor = Color.GRAY;
+                statusColor = new Color(120, 200, 120);
+            }
+            else if (active)
+            {
+                status = ritual ? "In progress" : "Active";
+                statusColor = ColorScheme.BRAND_ORANGE;
             }
             else
             {
