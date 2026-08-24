@@ -32,6 +32,13 @@ function Write-Warn { param([string] $Message) Write-Host "  $Message" -Foregrou
 Write-Host "`nVowTaker installer" -ForegroundColor White
 Write-Host ("-" * 40)
 
+# --- Nothing may be in use ------------------------------------------------
+if (Get-Process -Name 'RuneLite', 'java' -ErrorAction SilentlyContinue) {
+    Write-Warn "RuneLite is running. Close it completely, then run this installer again."
+    Write-Warn "The launcher file cannot be replaced while the client is open."
+    return
+}
+
 # --- Locate the jar -------------------------------------------------------
 $jar = Get-ChildItem -Path $SourceDir -Filter 'VowTaker-*.jar' -File -ErrorAction SilentlyContinue |
        Sort-Object LastWriteTime -Descending |
