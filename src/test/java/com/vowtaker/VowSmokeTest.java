@@ -334,6 +334,45 @@ class VowSmokeTest
     }
 
     @Test
+    void armourTagsNeverCatchWeapons() throws Exception
+    {
+        com.vowtaker.service.ItemTagRegistry tags = new com.vowtaker.service.ItemTagRegistry();
+        java.lang.reflect.Method setter = com.vowtaker.service.ItemTagRegistry.class
+            .getDeclaredMethod("setDirectoryOverride", Path.class);
+        setter.setAccessible(true);
+        setter.invoke(tags, java.nio.file.Files.createTempDirectory("vowtags5"));
+        tags.initialize();
+
+        String[] armourTags = {
+            "armour_metal", "armour_t10", "armour_t20", "armour_t30", "armour_t40",
+            "armour_t50", "armour_t60", "armour_t70", "armour_t80", "armour_t90",
+            "armour_melee", "armour_ranged", "armour_magic"
+        };
+        String[] weapons = {
+            "Iron mace", "Bronze sword", "Steel scimitar", "Mithril longsword", "Adamant dagger",
+            "Rune scimitar", "Dragon dagger", "Dharok's greataxe", "Ahrim's staff",
+            "Karil's crossbow", "Verac's flail", "Guthan's warspear", "Torag's hammers",
+            "Granite maul", "Twisted bow", "Scythe of vitur", "Elder maul", "Dragon pickaxe"
+        };
+
+        java.util.List<String> failures = new java.util.ArrayList<>();
+        for (String tag : armourTags)
+        {
+            for (String weapon : weapons)
+            {
+                if (tags.hasTag(tag, -1, weapon)) failures.add(tag + " matches " + weapon);
+            }
+        }
+        assertTrue(failures.isEmpty(), "armour tags must not block weapons: " + failures);
+
+        // The armour they are meant to catch must still match.
+        assertTrue(tags.hasTag("armour_metal", -1, "Iron platebody"));
+        assertTrue(tags.hasTag("armour_t70", -1, "Dharok's platelegs"));
+        assertTrue(tags.hasTag("armour_magic", -1, "Ahrim's robetop"));
+        assertTrue(tags.hasTag("armour_ranged", -1, "Karil's leathertop"));
+    }
+
+    @Test
     void everyVowIsActuallyEnforced() throws Exception
     {
         com.vowtaker.service.ItemTagRegistry tags = new com.vowtaker.service.ItemTagRegistry();

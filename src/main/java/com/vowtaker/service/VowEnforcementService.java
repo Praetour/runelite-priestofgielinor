@@ -63,6 +63,9 @@ public class VowEnforcementService
     private ItemTagRegistry itemTags;
 
     @Inject
+    private com.vowtaker.ui.VowBannerOverlay banner;
+
+    @Inject
     private VowTakerConfig config;
 
     private long lastBlockMessageTick;
@@ -667,6 +670,10 @@ public class VowEnforcementService
         storageService.completeVow(ritual);
         int gained = com.vowtaker.service.VowSelectionService.pointsFor(ritual);
         storageService.addPoints(gained);
+        if (banner != null)
+        {
+            banner.show("RITUAL FULFILLED", ritual.getName() + "  \u00b7  +" + gained + " devotion");
+        }
         client.addChatMessage(ChatMessageType.GAMEMESSAGE, "",
             "VowTaker: ritual complete \u2014 " + ritual.getName() + " (+" + gained + " pts). Combat is unlocked.", null);
         storageService.clearActiveRitualVow();

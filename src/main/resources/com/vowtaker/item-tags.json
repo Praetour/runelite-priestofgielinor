@@ -198,7 +198,11 @@
       "exclude": [
         "rune essence", "rune arrow", "rune bolt", "rune dart", "rune knife", "rune javelin",
         "rune pouch", "rune thrownaxe", "iron ore", "iron bar", "iron arrow", "black mask",
-        "dragon bones", "dragon arrow", "dragon bolt", "dragon dart", "dragon javelin"
+        "dragon bones", "dragon arrow", "dragon bolt", "dragon dart", "dragon javelin",
+        "sword", "scimitar", "mace", "dagger", "axe", "warhammer", "hammer", "halberd",
+        "spear", "hasta", "claws", "2h", "pickaxe", "crossbow", "bow", "whip", "flail",
+        "maul", "blade", "rapier", "scythe", "sceptre", "staff", "wand", "trident",
+        "harpoon", "anchor", "godsword", "longsword", "battleaxe", "greataxe", "warspear"
       ]
     },
     "armour_t80": {
@@ -277,7 +281,7 @@
       "exclude": []
     },
 
-    "_comment_armour_tiers": "Bands are exclusive - armour_t50 is rune-grade only, not everything up to rune. A 'no armour above tier 50' vow blocks t60+t70+t80+t90.",
+    "_comment_armour_tiers": "Bands are exclusive - armour_t50 is rune-grade only, not everything up to rune. A 'no armour above tier 50' vow blocks t60+t70+t80+t90. Every armour tag excludes weapon words, because bare metal names like 'iron' or 'rune ' otherwise match weapons too (Iron mace, Rune scimitar). Weapons belong to the weapon_* tags.",
 
     "armour_t10": {
       "options": ["wear", "wield", "equip"],
@@ -287,15 +291,29 @@
         "leather body", "leather chaps", "leather gloves", "leather boots", "leather cowl",
         "leather vambraces", "wizard robe", "wizard hat", "blue wizard", "black wizard"
       ],
-      "exclude": ["iron ore", "iron bar", "iron arrow", "iron dart", "iron knife", "iron bolts", "bronze arrow", "bronze dart", "bronze knife", "bronze bolts", "bronze bar", "bronze javelin", "bronze thrownaxe", "bronze nails"]
+      "exclude": [
+        "iron ore", "iron bar", "iron arrow", "iron dart", "iron knife", "iron bolts",
+        "bronze arrow", "bronze dart", "bronze knife", "bronze bolts", "bronze bar",
+        "bronze javelin", "bronze thrownaxe", "bronze nails", "bronze ore",
+        "sword", "scimitar", "mace", "dagger", "axe", "warhammer", "hammer", "halberd",
+        "spear", "hasta", "claws", "2h", "pickaxe", "crossbow", "bow", "whip", "flail",
+        "maul", "blade", "rapier", "scythe", "sceptre", "staff", "wand", "trident",
+        "harpoon", "anchor", "godsword", "longsword", "battleaxe", "greataxe", "warspear"
+      ]
     },
     "armour_t20": {
       "options": ["wear", "wield", "equip"],
       "names": [
         "steel", "studded body", "studded chaps", "hardleather", "hard leather",
-        "imphide", "silverlight", "monk's robe"
+        "imphide", "monk's robe"
       ],
-      "exclude": ["steel arrow", "steel dart", "steel knife", "steel bolts", "steel bar", "steel nails"]
+      "exclude": [
+        "steel arrow", "steel dart", "steel knife", "steel bolts", "steel bar", "steel nails",
+        "sword", "scimitar", "mace", "dagger", "axe", "warhammer", "hammer", "halberd",
+        "spear", "hasta", "claws", "2h", "pickaxe", "crossbow", "bow", "whip", "flail",
+        "maul", "blade", "rapier", "scythe", "sceptre", "staff", "wand", "trident",
+        "harpoon", "anchor", "godsword", "longsword", "battleaxe", "greataxe", "warspear"
+      ]
     },
     "armour_t30": {
       "options": ["wear", "wield", "equip"],
@@ -304,7 +322,14 @@
         "black med helm", "black full helm", "black kiteshield", "black sq shield", "black boots",
         "mithril", "spined", "skeletal", "rock-shell", "snakeskin"
       ],
-      "exclude": ["mithril arrow", "mithril dart", "mithril knife", "mithril bolts", "mithril bar", "black mask", "black d'hide", "black dragonhide", "black chinchompa"]
+      "exclude": [
+        "mithril arrow", "mithril dart", "mithril knife", "mithril bolts", "mithril bar",
+        "black mask", "black d'hide", "black dragonhide", "black chinchompa",
+        "sword", "scimitar", "mace", "dagger", "axe", "warhammer", "hammer", "halberd",
+        "spear", "hasta", "claws", "2h", "pickaxe", "crossbow", "bow", "whip", "flail",
+        "maul", "blade", "rapier", "scythe", "sceptre", "staff", "wand", "trident",
+        "harpoon", "anchor", "godsword", "longsword", "battleaxe", "greataxe", "warspear"
+      ]
     },
     "armour_t40": {
       "options": ["wear", "wield", "equip"],
@@ -313,7 +338,13 @@
         "splitbark", "white platebody", "white platelegs", "white helm", "white kiteshield",
         "carapace", "initiate", "budding"
       ],
-      "exclude": ["adamant arrow", "adamant dart", "adamant knife", "adamant bolts", "adamant bar"]
+      "exclude": [
+        "adamant arrow", "adamant dart", "adamant knife", "adamant bolts", "adamant bar",
+        "sword", "scimitar", "mace", "dagger", "axe", "warhammer", "hammer", "halberd",
+        "spear", "hasta", "claws", "2h", "pickaxe", "crossbow", "bow", "whip", "flail",
+        "maul", "blade", "rapier", "scythe", "sceptre", "staff", "wand", "trident",
+        "harpoon", "anchor", "godsword", "longsword", "battleaxe", "greataxe", "warspear"
+      ]
     },
     "armour_t50": {
       "options": ["wear", "wield", "equip"],
@@ -348,14 +379,18 @@
         "dragonfire shield", "dragonfire ward", "toktz-ket-xil", "infernal cape", "fire cape",
         "book of darkness", "spectral spirit", "arcane spirit", "elysian spirit"
       ],
-      "exclude": []
+      "exclude": [
+        "sword", "scimitar", "mace", "dagger", "axe", "warhammer", "hammer", "halberd",
+        "spear", "hasta", "claws", "2h", "pickaxe", "crossbow", "bow", "whip", "flail",
+        "maul", "blade", "rapier", "scythe", "sceptre", "staff", "wand", "trident",
+        "harpoon", "anchor", "godsword", "longsword", "battleaxe", "greataxe", "warspear"
+      ]
     },
     "armour_t90": {
       "options": ["wear", "wield", "equip"],
       "names": [
         "torva", "oathplate", "echo boots", "masori body (f)", "masori chaps (f)",
-        "masori mask (f)", "elysian spirit shield", "tumeken's shadow", "scythe of vitur",
-        "twisted bow", "soulreaper axe", "elder maul"
+        "masori mask (f)", "elysian spirit shield"
       ],
       "exclude": []
     },
@@ -368,7 +403,11 @@
         "justiciar", "inquisitor", "obsidian plate", "granite", "dharok", "torag", "verac", "guthan",
         "oathplate", "fighter torso", "berserker helm", "warrior helm", "neitiznot"
       ],
-      "exclude": []
+      "exclude": [
+        "sword", "scimitar", "mace", "dagger", "axe", "warhammer", "hammer", "halberd",
+        "spear", "hasta", "claws", "2h", "maul", "flail", "blade", "rapier", "godsword",
+        "longsword", "battleaxe", "greataxe", "warspear"
+      ]
     },
     "armour_ranged": {
       "options": ["wear", "wield", "equip"],
@@ -378,7 +417,7 @@
         "karil", "crystal body", "crystal legs", "crystal helm", "void ranger",
         "ava's", "dizana's quiver", "archer helm", "blessed d'hide"
       ],
-      "exclude": []
+      "exclude": ["crossbow", "bow", "blade", "dart", "knife", "javelin", "thrownaxe"]
     },
     "armour_magic": {
       "options": ["wear", "wield", "equip"],
@@ -388,7 +427,7 @@
         "farseer helm", "book of", "tormented bracelet", "occult", "eternal boots",
         "elidinis' ward", "arcane spirit", "void mage", "blue moon"
       ],
-      "exclude": []
+      "exclude": ["staff", "wand", "trident", "sceptre", "bow", "blade", "scythe"]
     },
 
     "potion_antipoison": {

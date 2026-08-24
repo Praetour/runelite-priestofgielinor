@@ -32,11 +32,16 @@ public class TaskService
     private VowSelectionService selection;
 
     @Inject
+    private com.vowtaker.ui.VowBannerOverlay banner;
+
+    @Inject
     private VowEnforcementService enforcement;
 
     private final Map<String, Pattern> compiledPatterns = new HashMap<>();
     private final Set<Integer> npcsDamagedByMe = new HashSet<>();
     private Runnable panelRefresh;
+    private Rank milestoneBaselineRank;
+    private boolean milestoneWasUnlocked;
 
     public void setPanelRefreshCallback(Runnable r)
     {
@@ -205,9 +210,44 @@ public class TaskService
             TaskDefinition milestone = TaskRegistry.milestoneFor(current);
             boolean milestoneDone = milestone == null || storage.isTaskCompleted(milestone.getId());
             boolean pointsMet = storage.getTotalPoints() >= next.getRequiredPoints();
+
+            announceMilestoneUnlock(current, milestone, milestoneDone, pointsMet);
             if (!milestoneDone || !pointsMet) return;
 
             promote();
+        }
+    }
+
+    /**
+     * Fires a banner the moment the tier's milestone becomes attemptable. Baselines silently on the
+     * first check after a rank change so logging in doesn't replay an unlock you already had.
+     */
+    private void announceMilestoneUnlock(Rank current, TaskDefinition milestone,
+                                         boolean milestoneDone, boolean pointsMet)
+    {
+        if (milestone == null) return;
+        if (milestoneBaselineRank != current)
+        {
+            milestoneBaselineRank = current;
+            milestoneWasUnlocked = pointsMet && !milestoneDone;
+            return;
+        }
+
+        boolean unlockedNow = pointsMet && !milestoneDone;
+        if (unlockedNow && !milestoneWasUnlocked)
+        {
+            showBanner("TRIAL UNSEALED", milestone.getName() + " awaits you");
+            announce("VowTaker: your trial is unsealed \u2014 " + milestone.getName() + ".");
+        }
+        milestoneWasUnlocked = unlockedNow;
+    }
+
+    /** The overlay is absent in headless contexts, so never let a banner take the caller down. */
+    private void showBanner(String title, String subtitle)
+    {
+        if (banner != null)
+        {
+            banner.show(title, subtitle);
         }
     }
 
@@ -223,6 +263,8 @@ public class TaskService
         }
 
         storage.setCurrentRank(next);
+        showBanner(next.getLabel().toUpperCase(java.util.Locale.ROOT) + "  ORDAINED",
+            "You rise as " + next.fullTitle(storage.getSelectedGod()));
         announce("VowTaker: you have ascended to " + next.fullTitle(storage.getSelectedGod()) + "!");
         announce("VowTaker: gear ceiling raised \u2014 " + gearCeilingLabel(next) + " is now permitted.");
         String flavor = godRankFlavor(storage.getSelectedGod(), next, resolvePlayerName());

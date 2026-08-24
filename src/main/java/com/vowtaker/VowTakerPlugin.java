@@ -95,6 +95,9 @@ public class VowTakerPlugin extends Plugin
     private VowChoiceOverlay choiceOverlay;
 
     @Inject
+    private com.vowtaker.ui.VowBannerOverlay bannerOverlay;
+
+    @Inject
     private VowTakerPanel panel;
 
     @Inject
@@ -135,6 +138,7 @@ public class VowTakerPlugin extends Plugin
             overlayManager.add(vowOverlay);
         }
         overlayManager.add(choiceOverlay);
+        overlayManager.add(bannerOverlay);
 
         selectionService.setOnSelectionResolved(msg ->
         {
@@ -219,6 +223,7 @@ public class VowTakerPlugin extends Plugin
         started = false;
         overlayManager.remove(vowOverlay);
         overlayManager.remove(choiceOverlay);
+        overlayManager.remove(bannerOverlay);
         if (navButton != null)
         {
             clientToolbar.removeNavigation(navButton);
