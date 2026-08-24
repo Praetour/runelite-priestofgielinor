@@ -180,13 +180,35 @@ public class TaskService
             announce("VowTaker: task complete \u2014 " + task.getName());
         }
         applyTaskUnlocks(task);
-        if (task.isMilestone())
-        {
-            promote();
-        }
+        checkPromotion();
         checkVowsFulfilled();
         if (panelRefresh != null) panelRefresh.run();
         return true;
+    }
+
+    /**
+     * Promotes whenever the rank's milestone is done and its point threshold is met.
+     *
+     * <p>Deliberately state-driven rather than fired from the milestone completion event: an event
+     * only happens once, so any save that ends up eligible-but-unpromoted could never recover.
+     * Evaluating the condition means a stuck save heals itself the next time this runs.
+     */
+    public void checkPromotion()
+    {
+        // Guard against an enum change ever making next() cycle.
+        for (int guard = 0; guard < 8; guard++)
+        {
+            Rank current = storage.getCurrentRank();
+            Rank next = current.next();
+            if (next == current) return;
+
+            TaskDefinition milestone = TaskRegistry.milestoneFor(current);
+            boolean milestoneDone = milestone == null || storage.isTaskCompleted(milestone.getId());
+            boolean pointsMet = storage.getTotalPoints() >= next.getRequiredPoints();
+            if (!milestoneDone || !pointsMet) return;
+
+            promote();
+        }
     }
 
     /** Rank up, raise the gear ceiling, grant a re-roll token, and queue the Major vow draw. */
@@ -257,15 +279,6 @@ public class TaskService
         Rank next = current.next();
         if (next == current) return true;
         return storage.getTotalPoints() >= next.getRequiredPoints();
-    }
-
-    /** Recovery path for saves stuck with a pending-promotion flag from the old two-step flow. */
-    public void checkPromotion()
-    {
-        if (storage.isPendingPromotion())
-        {
-            promote();
-        }
     }
 
     private String resolvePlayerName()

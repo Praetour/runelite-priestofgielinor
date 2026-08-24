@@ -193,6 +193,61 @@ class VowSmokeTest
         assertTrue(tags.hasTag("tool_high_tier", -1, "Dragon pickaxe"));
     }
 
+    private com.vowtaker.service.TaskService createTaskService(VowStorageService storage,
+                                                               VowSelectionService selection) throws Exception
+    {
+        com.vowtaker.service.TaskService taskService = new com.vowtaker.service.TaskService();
+        for (String field : new String[]{"storage", "selection"})
+        {
+            Field f = com.vowtaker.service.TaskService.class.getDeclaredField(field);
+            f.setAccessible(true);
+            f.set(taskService, "storage".equals(field) ? storage : selection);
+        }
+        return taskService;
+    }
+
+    @Test
+    void promotionRecoversASaveThatIsAlreadyEligible(@TempDir Path tempDir) throws Exception
+    {
+        VowStorageService storage = createStorage(tempDir);
+        VowSelectionService selection = createSelectionService(storage);
+        com.vowtaker.service.TaskService tasks = createTaskService(storage, selection);
+
+        // Reproduces a save left behind by an earlier build: milestone done, threshold met,
+        // rank never advanced. There is no completion event left to fire.
+        storage.setSelectedGod(GodAlignment.ZAMORAK);
+        storage.setCurrentRank(com.vowtaker.model.Rank.FOLLOWER);
+        storage.addPoints(50);
+        storage.completeTask("m1_brutus");
+        assertEquals(com.vowtaker.model.Rank.FOLLOWER, storage.getCurrentRank());
+
+        tasks.checkPromotion();
+
+        assertEquals(com.vowtaker.model.Rank.DEACON, storage.getCurrentRank());
+    }
+
+    @Test
+    void promotionWaitsForBothPointsAndMilestone(@TempDir Path tempDir) throws Exception
+    {
+        VowStorageService storage = createStorage(tempDir);
+        VowSelectionService selection = createSelectionService(storage);
+        com.vowtaker.service.TaskService tasks = createTaskService(storage, selection);
+
+        storage.setSelectedGod(GodAlignment.ZAMORAK);
+        storage.setCurrentRank(com.vowtaker.model.Rank.FOLLOWER);
+
+        // Milestone done but short on points.
+        storage.completeTask("m1_brutus");
+        storage.addPoints(49);
+        tasks.checkPromotion();
+        assertEquals(com.vowtaker.model.Rank.FOLLOWER, storage.getCurrentRank());
+
+        // Threshold reached: the next check promotes, no completion event required.
+        storage.addPoints(1);
+        tasks.checkPromotion();
+        assertEquals(com.vowtaker.model.Rank.DEACON, storage.getCurrentRank());
+    }
+
     @Test
     void versionCompareNeverTriggersADowngrade()
     {

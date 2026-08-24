@@ -275,6 +275,9 @@ public class VowTakerPlugin extends Plugin
         milestoneService.updateMilestones();
         selectionService.pollSelection();
         enforcementService.tick();
+        // Cheap idempotent re-check: guarantees a promotion can never be permanently missed,
+        // whatever order points and milestones arrived in.
+        taskService.checkPromotion();
 
         // Quartile ticker: 25/50/75% of the current rank-up bar each queue a rank-appropriate vow draw.
         if (selectionService.checkPointsProgress())
@@ -460,6 +463,8 @@ public class VowTakerPlugin extends Plugin
         }
         client.addChatMessage(net.runelite.api.ChatMessageType.GAMEMESSAGE, "",
             "VowTaker: profile loaded for " + name.trim() + ".", null);
+        // Re-evaluate here so a save that was left eligible-but-unpromoted corrects itself.
+        taskService.checkPromotion();
         SwingUtilities.invokeLater(panel::refresh);
     }
 
