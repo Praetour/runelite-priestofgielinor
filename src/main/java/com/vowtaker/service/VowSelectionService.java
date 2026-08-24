@@ -31,13 +31,11 @@ public class VowSelectionService
     }
 
     /** IDs of PERMANENT vows that count as "Major" filler and only draw once a god is chosen. */
-    private static final int REQUIRED_MILESTONES = 3;
     @Inject
     private VowStorageService storageService;
 
     private final List<VowSelection> hiddenCards = new ArrayList<>();
     private boolean selectionPending;
-    private int milestoneCount;
     private boolean pendingForcedOpen;
     private DrawMode pendingDrawMode = DrawMode.BY_RANK_SEVERITY;
     private DrawMode currentDrawMode = DrawMode.BY_RANK_SEVERITY;
@@ -47,7 +45,6 @@ public class VowSelectionService
     {
         hiddenCards.clear();
         selectionPending = false;
-        milestoneCount = 0;
         pendingForcedOpen = false;
         currentDrawMode = DrawMode.BY_RANK_SEVERITY;
     }
@@ -324,18 +321,21 @@ public class VowSelectionService
 
     public void tryQueueSelection()
     {
-        milestoneCount++;
-        if (milestoneCount >= REQUIRED_MILESTONES && !getApprovedVows().isEmpty())
-        {
-            // Milestone reward = Major draw (god vows + filler perms), revealed.
-            pendingForcedOpen = true;
-            pendingDrawMode = DrawMode.MAJOR_REVEALED;
-        }
+        // Intentionally inert: kept so older call sites cannot silently resurrect the
+        // skill-milestone picker that fired before a god had been chosen.
     }
 
     /** Bypass milestone gate; open the card picker immediately. Clears any queued forced-open. */
     public void forceOpenSelection()
     {
+        // Nothing may be offered before a god is chosen except the god's own first draw.
+        if (storageService.getSelectedGod() == GodAlignment.NONE && pendingDrawMode != DrawMode.GOD_ONLY)
+        {
+            pendingForcedOpen = false;
+            pendingDrawMode = DrawMode.BY_RANK_SEVERITY;
+            return;
+        }
+
         buildHiddenCards(pendingDrawMode);
         // Always clear the queue flag: an exhausted pool must not leave a forced-open pending forever.
         pendingForcedOpen = false;

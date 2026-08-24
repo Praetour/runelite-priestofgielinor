@@ -334,6 +334,32 @@ class VowSmokeTest
     }
 
     @Test
+    void noVowIsOfferedBeforeAGodIsChosen(@TempDir Path tempDir) throws Exception
+    {
+        VowStorageService storage = createStorage(tempDir);
+        VowSelectionService selection = createSelectionService(storage);
+        assertEquals(GodAlignment.NONE, storage.getSelectedGod());
+
+        // Legacy skill-milestone trigger must never queue a draw.
+        selection.tryQueueSelection();
+        selection.tryQueueSelection();
+        selection.tryQueueSelection();
+        selection.tryQueueSelection();
+        assertFalse(selection.hasPendingForcedOpen());
+
+        // Nor may any explicit non-god draw open one.
+        selection.forceOpenSelection(VowSelectionService.DrawMode.MINOR);
+        assertFalse(selection.hasPendingSelection());
+        selection.forceOpenSelection(VowSelectionService.DrawMode.MAJOR_REVEALED);
+        assertFalse(selection.hasPendingSelection());
+
+        // The god's own first draw is the one thing allowed.
+        storage.setSelectedGod(GodAlignment.ZAMORAK);
+        selection.forceOpenSelection(VowSelectionService.DrawMode.GOD_ONLY);
+        assertTrue(selection.hasPendingSelection());
+    }
+
+    @Test
     void rerollSpendsATokenAndChangesTheOffer(@TempDir Path tempDir) throws Exception
     {
         VowStorageService storage = createStorage(tempDir);

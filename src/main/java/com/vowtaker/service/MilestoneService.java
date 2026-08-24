@@ -100,10 +100,9 @@ public class MilestoneService
 
     public void markMilestone(String milestoneId)
     {
-        if (completedMilestones.add(milestoneId) && selectionService != null)
-        {
-            selectionService.tryQueueSelection();
-        }
+        // Records progress only. Vow pickers are driven solely by god selection, promotions and
+        // point checkpoints - queueing from skill-level milestones fired before a god was chosen.
+        completedMilestones.add(milestoneId);
     }
 
     public boolean hasCompleted(String milestoneId)
