@@ -1,0 +1,4 @@
+{
+  "_comment": "Point manifestUrl at wherever you host update-manifest.json. For GitHub Releases use the 'latest' download URL so it never needs changing between releases.",
+  "manifestUrl": "https://github.com/Praetour/runelite-priestofgielinor/releases/latest/download/update-manifest.json"
+}

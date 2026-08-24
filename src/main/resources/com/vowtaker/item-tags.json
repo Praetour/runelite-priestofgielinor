@@ -1,0 +1,511 @@
+{
+  "_comment": [
+    "VowTaker item blocklist. A copy of this file is written to <RuneLite dir>/vowtaker/item-tags.json",
+    "on first run. Edit THAT copy - it is merged over these defaults on every startup and is never",
+    "overwritten again, so your edits survive plugin updates.",
+    "",
+    "Each tag entry supports:",
+    "  options    - menu options this tag gates (lowercase). Empty = gate every option.",
+    "  names      - case-insensitive SUBSTRING matches against the item name.",
+    "  exactNames - case-insensitive WHOLE-name matches.",
+    "  ids        - exact item ids. Use these when a name is ambiguous.",
+    "  exclude    - substrings that veto a match, applied after names/exactNames/ids.",
+    "",
+    "To catch something the defaults miss (a new item, a game update, a renamed item) just add",
+    "its name or id to the relevant tag. Vows reference tags by name, so anything you add is",
+    "immediately enforced by every vow that blocks that tag."
+  ],
+
+  "tags": {
+    "boots": {
+      "options": ["wear", "wield", "equip"],
+      "names": ["boots", "shoes", "sandals", "climbing boots", "spiked manacles"],
+      "exclude": []
+    },
+    "gloves": {
+      "options": ["wear", "wield", "equip"],
+      "names": ["gloves", "gauntlets", "vambraces", "bracers", "mitts", "vamb"],
+      "exclude": []
+    },
+    "cape": {
+      "options": ["wear", "wield", "equip"],
+      "names": ["cape", "cloak", "quiver", "ava's"],
+      "exclude": []
+    },
+    "chest": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "platebody", "chestplate", "chainbody", "chainmail", "body", "robe top", "hauberk",
+        "torso", "top", "jacket", "shirt", "brassard"
+      ],
+      "exclude": ["body rune", "bodyguard"]
+    },
+    "legs": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "platelegs", "plateskirt", "chaps", "robe bottom", "tassets", "skirt", " legs",
+        "trousers", "cuisse", "leggings"
+      ],
+      "exclude": []
+    },
+    "helmet": {
+      "options": ["wear", "wield", "equip"],
+      "names": ["helm", "coif", "hood", "mask", "hat", "faceguard", "mitre", "crown"],
+      "exclude": ["helmet stand"]
+    },
+    "shield": {
+      "options": ["wear", "wield", "equip"],
+      "names": ["shield", "defender", "ward", "book of", "kiteshield", "sq shield", "boater"],
+      "exclude": []
+    },
+    "ring": {
+      "options": ["wear", "wield", "equip"],
+      "names": ["ring of", " ring", "lightbearer", "ultor", "magus", "venator", "bellator"],
+      "exclude": ["ring of charos", "ring of visibility"]
+    },
+    "amulet": {
+      "options": ["wear", "wield", "equip"],
+      "names": ["amulet", "necklace", "pendant", "torture", "anguish", "occult", "fury", "salve"],
+      "exclude": []
+    },
+
+    "jewellery_t80": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "amulet of torture", "necklace of anguish", "occult necklace", "amulet of rancour",
+        "tormented bracelet", "ring of suffering", "lightbearer", "ultor ring", "magus ring",
+        "venator ring", "bellator ring", "amulet of blood fury", "berserker necklace",
+        "brimstone ring", "ring of the gods", "primordial", "pegasian", "eternal boots",
+        "ferocious gloves", "barrows gloves"
+      ],
+      "exclude": []
+    },
+    "jewellery_t70": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "amulet of fury", "amulet of glory", "berserker ring", "archers ring", "seers ring",
+        "warrior ring", "ring of wealth", "dragonstone", "onyx", "zenyte", "regen bracelet",
+        "amulet of eternal glory"
+      ],
+      "exclude": []
+    },
+
+    "food_t10": {
+      "options": ["eat"],
+      "names": [
+        "shrimps", "anchovies", "sardine", "herring", "bread", "cooked meat", "cooked chicken",
+        "cake", "chocolate cake", "meat pie", "cooked crab meat", "roll", "baguette"
+      ],
+      "exclude": []
+    },
+    "food_t40": {
+      "options": ["eat"],
+      "names": [
+        "trout", "salmon", "tuna", "cod", "pike", "lobster", "bass", "cooked karambwan",
+        "plain pizza", "meat pizza", "anchovy pizza", "stew", "curry"
+      ],
+      "exclude": []
+    },
+    "food_t60": {
+      "options": ["eat"],
+      "names": [
+        "swordfish", "monkfish", "shark", "sea turtle", "manta ray", "anglerfish", "dark crab",
+        "pineapple pizza", "summer pie", "wild pie", "admiral pie", "tuna potato",
+        "cooked karambwan", "potato with cheese"
+      ],
+      "exclude": []
+    },
+    "food_brews": {
+      "options": ["eat", "drink"],
+      "names": ["saradomin brew", "xeric's aid", "xeric's talisman"],
+      "exclude": []
+    },
+
+    "potion_t70": {
+      "options": ["drink"],
+      "names": [
+        "super combat", "divine", "overload", "ancient brew", "bastion potion", "battlemage potion",
+        "super restore", "sanfew", "saradomin brew", "forgotten brew", "menaphite remedy",
+        "stamina potion", "prayer potion", "super antifire", "extended antifire"
+      ],
+      "exclude": []
+    },
+    "potion_combat": {
+      "options": ["drink"],
+      "names": [
+        "attack potion", "strength potion", "defence potion", "ranging potion", "magic potion",
+        "combat potion", "super attack", "super strength", "super defence", "super ranging",
+        "super magic", "super combat", "divine", "overload", "bastion", "battlemage",
+        "ancient brew", "forgotten brew", "imbued heart", "saturated heart"
+      ],
+      "exclude": []
+    },
+    "potion_stamina": {
+      "options": ["drink", "empty"],
+      "names": ["stamina potion", "energy potion", "super energy"],
+      "exclude": []
+    },
+    "potion_prayer": {
+      "options": ["drink"],
+      "names": ["prayer potion", "super restore", "sanfew serum", "prayer enhance", "moonlight potion"],
+      "exclude": []
+    },
+
+    "weapon_ranged": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "shortbow", "longbow", "crossbow", "c'bow", "blowpipe", "chinchompa", "dart", "knife",
+        "javelin", "throwing axe", "thrownaxe", "bow of faerdhinen", "twisted bow", "craw's bow",
+        "webweaver", "hunters' sunlight", "tonalztics", "dizana", "seercull", "dark bow",
+        "toxic blowpipe", "eclipse atlatl"
+      ],
+      "exclude": ["bow string", "crossbow string", "bowstring"]
+    },
+    "weapon_magic": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "staff", "wand", "trident", "sceptre", "tumeken's shadow", "kodai", "nightmare staff",
+        "sanguinesti", "harmonised", "volatile", "eldritch", "warped sceptre", "crystal staff",
+        "dawnbringer", "accursed sceptre", "purging staff", "bone staff"
+      ],
+      "exclude": ["staff of the dead is"]
+    },
+    "weapon_two_handed": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "2h sword", "godsword", "maul", "halberd", "scythe", "warhammer", "battleaxe", "greataxe",
+        "longbow", "shortbow", "dark bow", "twisted bow", "bow of faerdhinen", "crystal bow",
+        "elder maul", "soulreaper axe", "dinh's bulwark", "colossal blade", "noxious halberd"
+      ],
+      "exclude": []
+    },
+    "weapon_degradeable": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "crystal", "barrows", "ahrim", "dharok", "guthan", "karil", "torag", "verac",
+        "blade of saeldor", "bow of faerdhinen", "sanguinesti", "abyssal tentacle",
+        "trident of the swamp", "toxic blowpipe", "craw's bow", "thammaron", "viggora"
+      ],
+      "exclude": []
+    },
+
+    "armour_metal": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "bronze", "iron ", "steel", "black ", "white ", "mithril", "adamant", "rune ", "runite",
+        "dragon ", "granite", "obsidian", "bandos ", "torva", "justiciar", "inquisitor"
+      ],
+      "exclude": [
+        "rune essence", "rune arrow", "rune bolt", "rune dart", "rune knife", "rune javelin",
+        "rune pouch", "rune thrownaxe", "iron ore", "iron bar", "iron arrow", "black mask",
+        "dragon bones", "dragon arrow", "dragon bolt", "dragon dart", "dragon javelin"
+      ]
+    },
+    "armour_t80": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "torva", "masori", "ancestral", "justiciar", "virtus", "sunfire fanatic", "inquisitor",
+        "bandos chestplate", "bandos tassets", "armadyl chestplate", "armadyl chainskirt",
+        "primordial", "pegasian", "eternal boots", "avernic", "elysian", "arcane spirit",
+        "spectral spirit", "elidinis' ward", "dizana's quiver", "echo boots", "oathplate"
+      ],
+      "exclude": []
+    },
+    "armour_barrows": {
+      "options": ["wear", "wield", "equip"],
+      "names": ["ahrim", "dharok", "guthan", "karil", "torag", "verac"],
+      "exclude": []
+    },
+
+    "travel_teleport_item": {
+      "options": ["rub", "break", "teleport", "invoke", "empty"],
+      "names": [
+        "teleport", "games necklace", "ring of dueling", "amulet of glory", "combat bracelet",
+        "skills necklace", "digsite pendant", "necklace of passage", "burning amulet",
+        "royal seed pod", "ectophial", "xeric's talisman", "drakan's medallion",
+        "pharaoh's sceptre", "enchanted lyre", "slayer ring", "chronicle", "mounted"
+      ],
+      "exclude": []
+    },
+    "travel_fairy_ring": {
+      "options": ["configure", "use", "last-destination", "last destination", "ring-last-destination"],
+      "names": ["fairy ring"],
+      "exclude": []
+    },
+    "travel_spirit_tree": {
+      "options": ["travel", "teleport"],
+      "names": ["spirit tree"],
+      "exclude": []
+    },
+
+    "spec_attack": {
+      "options": ["use"],
+      "names": ["special attack"],
+      "exclude": []
+    },
+    "poison_weapon": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "(p)", "(p+)", "(p++)", "abyssal tentacle", "toxic blowpipe", "trident of the swamp",
+        "serpentine helm", "emberlight", "venator bow", "noxious"
+      ],
+      "exclude": []
+    },
+
+    "_comment_armour_tiers": "Bands are exclusive - armour_t50 is rune-grade only, not everything up to rune. A 'no armour above tier 50' vow blocks t60+t70+t80+t90.",
+
+    "armour_t10": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "bronze", "iron helm", "iron platebody", "iron platelegs", "iron plateskirt",
+        "iron chainbody", "iron kiteshield", "iron sq shield", "iron boots",
+        "leather body", "leather chaps", "leather gloves", "leather boots", "leather cowl",
+        "leather vambraces", "wizard robe", "wizard hat", "blue wizard", "black wizard"
+      ],
+      "exclude": ["iron ore", "iron bar", "iron arrow", "iron dart", "iron knife", "iron bolts", "bronze arrow", "bronze dart", "bronze knife", "bronze bolts", "bronze bar", "bronze javelin", "bronze thrownaxe", "bronze nails"]
+    },
+    "armour_t20": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "steel", "studded body", "studded chaps", "hardleather", "hard leather",
+        "imphide", "silverlight", "monk's robe"
+      ],
+      "exclude": ["steel arrow", "steel dart", "steel knife", "steel bolts", "steel bar", "steel nails"]
+    },
+    "armour_t30": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "black platebody", "black platelegs", "black plateskirt", "black chainbody",
+        "black med helm", "black full helm", "black kiteshield", "black sq shield", "black boots",
+        "mithril", "spined", "skeletal", "rock-shell", "snakeskin"
+      ],
+      "exclude": ["mithril arrow", "mithril dart", "mithril knife", "mithril bolts", "mithril bar", "black mask", "black d'hide", "black dragonhide", "black chinchompa"]
+    },
+    "armour_t40": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "adamant", "adamantite", "green d'hide", "green dragonhide", "mystic",
+        "splitbark", "white platebody", "white platelegs", "white helm", "white kiteshield",
+        "carapace", "initiate", "budding"
+      ],
+      "exclude": ["adamant arrow", "adamant dart", "adamant knife", "adamant bolts", "adamant bar"]
+    },
+    "armour_t50": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "rune platebody", "rune platelegs", "rune plateskirt", "rune chainbody",
+        "rune full helm", "rune med helm", "rune kiteshield", "rune sq shield", "rune boots",
+        "rune gloves", "rune defender", "blue d'hide", "blue dragonhide", "proselyte",
+        "enchanted robe", "enchanted top", "enchanted hat", "fremennik", "helm of neitiznot"
+      ],
+      "exclude": ["rune arrow", "rune dart", "rune knife", "rune bolts", "rune bar", "rune pouch", "rune essence", "runite ore", "rune javelin", "rune thrownaxe"]
+    },
+    "armour_t60": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "dragon chainbody", "dragon platebody", "dragon platelegs", "dragon plateskirt",
+        "dragon full helm", "dragon med helm", "dragon sq shield", "dragon kiteshield",
+        "dragon boots", "dragon defender", "red d'hide", "red dragonhide",
+        "granite helm", "granite body", "granite legs", "granite shield", "granite boots",
+        "berserker helm", "warrior helm", "archer helm", "farseer helm", "void knight", "void ranger",
+        "void mage", "void melee", "elite void"
+      ],
+      "exclude": ["dragon bones", "dragon arrow", "dragon dart", "dragon bolts", "dragon javelin", "dragonfire"]
+    },
+    "armour_t70": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "ahrim", "dharok", "guthan", "karil", "torag", "verac",
+        "black d'hide", "black dragonhide", "obsidian platebody", "obsidian platelegs",
+        "obsidian helmet", "crystal helm", "crystal body", "crystal legs", "crystal shield",
+        "blood moon", "blue moon", "eclipse moon", "3rd age", "third age",
+        "neitiznot faceguard", "serpentine helm", "tanzanite helm", "magma helm",
+        "dragonfire shield", "dragonfire ward", "toktz-ket-xil", "infernal cape", "fire cape",
+        "book of darkness", "spectral spirit", "arcane spirit", "elysian spirit"
+      ],
+      "exclude": []
+    },
+    "armour_t90": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "torva", "oathplate", "echo boots", "masori body (f)", "masori chaps (f)",
+        "masori mask (f)", "elysian spirit shield", "tumeken's shadow", "scythe of vitur",
+        "twisted bow", "soulreaper axe", "elder maul"
+      ],
+      "exclude": []
+    },
+
+    "armour_melee": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "platebody", "platelegs", "plateskirt", "chainbody", "full helm", "med helm",
+        "kiteshield", "sq shield", "defender", "torva", "bandos chestplate", "bandos tassets",
+        "justiciar", "inquisitor", "obsidian plate", "granite", "dharok", "torag", "verac", "guthan",
+        "oathplate", "fighter torso", "berserker helm", "warrior helm", "neitiznot"
+      ],
+      "exclude": []
+    },
+    "armour_ranged": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "d'hide", "dragonhide", "leather body", "leather chaps", "studded", "coif",
+        "masori", "armadyl chestplate", "armadyl chainskirt", "armadyl helmet",
+        "karil", "crystal body", "crystal legs", "crystal helm", "void ranger",
+        "ava's", "dizana's quiver", "archer helm", "blessed d'hide"
+      ],
+      "exclude": []
+    },
+    "armour_magic": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "robe top", "robe bottom", "wizard hat", "wizard robe", "mystic", "splitbark",
+        "ahrim", "ancestral", "virtus", "infinity", "dagon'hai", "bloodbark", "swampbark",
+        "farseer helm", "book of", "tormented bracelet", "occult", "eternal boots",
+        "elidinis' ward", "arcane spirit", "void mage", "blue moon"
+      ],
+      "exclude": []
+    },
+
+    "potion_antipoison": {
+      "options": ["drink"],
+      "names": [
+        "antipoison", "anti-poison", "superantipoison", "super antipoison", "antidote",
+        "anti-venom", "antivenom", "sanfew serum", "relicym"
+      ],
+      "exclude": []
+    },
+    "potion_antifire": {
+      "options": ["drink"],
+      "names": ["antifire", "anti-dragon", "extended antifire", "super antifire"],
+      "exclude": []
+    },
+    "potion_divine": {
+      "options": ["drink"],
+      "names": ["divine super", "divine ranging", "divine magic", "divine bastion", "divine battlemage"],
+      "exclude": []
+    },
+    "potion_overload": {
+      "options": ["drink"],
+      "names": ["overload", "elder potion", "revitalisation", "prayer enhance", "twisted potion", "kodai potion"],
+      "exclude": []
+    },
+
+    "ammo_t50": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "rune arrow", "amethyst arrow", "dragon arrow", "rune bolts", "diamond bolts",
+        "ruby bolts", "dragonstone bolts", "onyx bolts", "runite bolts", "dragon bolts",
+        "amethyst dart", "dragon dart", "rune dart", "rune javelin", "dragon javelin",
+        "amethyst javelin", "rune knife", "dragon knife", "black chinchompa"
+      ],
+      "exclude": []
+    },
+    "ammo_enchanted_bolts": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "opal bolts (e)", "jade bolts (e)", "pearl bolts (e)", "topaz bolts (e)",
+        "sapphire bolts (e)", "emerald bolts (e)", "ruby bolts (e)", "diamond bolts (e)",
+        "dragonstone bolts (e)", "onyx bolts (e)", "opal dragon bolts (e)",
+        "jade dragon bolts (e)", "pearl dragon bolts (e)", "topaz dragon bolts (e)",
+        "sapphire dragon bolts (e)", "emerald dragon bolts (e)", "ruby dragon bolts (e)",
+        "diamond dragon bolts (e)", "dragonstone dragon bolts (e)", "onyx dragon bolts (e)"
+      ],
+      "exclude": []
+    },
+
+    "combo_food": {
+      "options": ["eat"],
+      "names": ["cooked karambwan", "saradomin brew", "xeric's aid"],
+      "exclude": []
+    },
+
+    "slayer_helmet": {
+      "options": ["wear", "wield", "equip"],
+      "names": ["slayer helmet", "black mask", "slayer helm"],
+      "exclude": []
+    },
+    "salve_amulet": {
+      "options": ["wear", "wield", "equip"],
+      "names": ["salve amulet"],
+      "exclude": []
+    },
+    "god_cape": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "saradomin cape", "guthix cape", "zamorak cape", "imbued saradomin", "imbued guthix",
+        "imbued zamorak", "god cape", "ardougne cloak", "max cape", "infernal cape", "fire cape",
+        "mythical cape", "assembler", "ava's"
+      ],
+      "exclude": []
+    },
+    "imbued_ring": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "berserker ring (i)", "archers ring (i)", "seers ring (i)", "warrior ring (i)",
+        "treasonous ring (i)", "tyrannical ring (i)", "ring of the gods (i)", "granite ring (i)"
+      ],
+      "exclude": []
+    },
+    "crystal_equipment": {
+      "options": ["wear", "wield", "equip"],
+      "names": ["crystal helm", "crystal body", "crystal legs", "crystal shield", "crystal bow", "crystal halberd", "bow of faerdhinen", "blade of saeldor"],
+      "exclude": []
+    },
+    "blessed_item": {
+      "options": ["wear", "wield", "equip"],
+      "names": ["blessed", "holy symbol", "unholy symbol", "god book", "bandos book", "armadyl book", "ancient book"],
+      "exclude": []
+    },
+    "graceful_outfit": {
+      "options": ["wear", "wield", "equip"],
+      "names": ["graceful", "boots of lightness", "spottier cape", "agility cape"],
+      "exclude": []
+    },
+    "spec_weapon": {
+      "options": ["wear", "wield", "equip"],
+      "names": [
+        "dragon claws", "dragon warhammer", "dragon dagger", "granite maul", "armadyl godsword",
+        "bandos godsword", "saradomin godsword", "zamorak godsword", "abyssal dagger",
+        "voidwaker", "elder maul", "burning claws", "statius's warhammer", "arclight", "emberlight",
+        "barrelchest anchor", "crystal halberd", "dragon halberd", "dragon sword", "saradomin sword"
+      ],
+      "exclude": []
+    },
+    "shield_defensive": {
+      "options": ["wear", "wield", "equip"],
+      "names": ["dragonfire shield", "dragonfire ward", "elysian", "spectral", "arcane", "justiciar", "twisted buckler", "dinh's bulwark"],
+      "exclude": []
+    },
+
+    "util_storage_bag": {
+      "options": ["wear", "wield", "equip", "use", "open", "fill"],
+      "names": ["looting bag", "herb sack", "seed box", "coal bag", "gem bag", "plank sack", "rune pouch", "quiver"],
+      "exclude": []
+    },
+    "util_bone_device": {
+      "options": ["wear", "wield", "equip", "use", "activate"],
+      "names": ["bonecrusher", "ash sanctifier", "ectoplasmator", "demonic offering", "sinister offering"],
+      "exclude": []
+    },
+
+    "tool_high_tier": {
+      "options": ["wear", "wield", "equip", "use"],
+      "names": [
+        "dragon pickaxe", "crystal pickaxe", "infernal pickaxe", "3rd age pickaxe",
+        "dragon axe", "crystal axe", "infernal axe", "3rd age axe",
+        "dragon harpoon", "infernal harpoon", "crystal harpoon", "trailblazer harpoon",
+        "gilded pickaxe", "gilded axe"
+      ],
+      "exclude": []
+    },
+    "tool_skilling_boost": {
+      "options": ["wear", "wield", "equip", "use"],
+      "names": [
+        "lava staff", "smiths outfit", "smith's outfit", "prospector", "angler",
+        "lumberjack", "farmer's", "rogue", "pyromancer", "carpenter", "zealot's",
+        "golden prospector", "raiments of the eye", "shayzien"
+      ],
+      "exclude": []
+    }
+  }
+}

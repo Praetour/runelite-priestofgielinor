@@ -1,0 +1,26 @@
+{
+  "//": "VowTaker task overrides. Edit any built-in task by matching its id, or add new ones with fresh ids.",
+  "//tier": "FOLLOWER | PRIEST | CARDINAL | BISHOP",
+  "//category": "COMBAT | SKILLING | QUEST | MINIGAME | EXPLORATION | MILESTONE",
+  "//godFlavor": "NONE | SARADOMIN | ZAMORAK | GUTHIX | ARMADYL | ZAROS | BANDOS",
+  "//trigger.kind": "CHAT_PATTERN | NPC_KILL | ITEM_OBTAIN | WIDGET | MANUAL",
+  "//gatedTargets": "NPC/object names whose menu options get blocked while this task is above your rank.",
+  "tasks": [
+    {
+      "id": "example_custom_task",
+      "name": "Example custom task",
+      "description": "This entry demonstrates the override JSON format. Delete it and add your own.",
+      "tier": "FOLLOWER",
+      "category": "SKILLING",
+      "godFlavor": "NONE",
+      "points": 5,
+      "milestone": false,
+      "trigger": {
+        "kind": "CHAT_PATTERN",
+        "pattern": "(?i)you catch a raw trout",
+        "amount": 1
+      },
+      "gatedTargets": []
+    }
+  ]
+}
