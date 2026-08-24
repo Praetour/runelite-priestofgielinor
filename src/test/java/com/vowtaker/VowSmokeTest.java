@@ -334,6 +334,74 @@ class VowSmokeTest
     }
 
     @Test
+    void vowPointsAreHalvedRoundingUp()
+    {
+        // naked_ironman overrides to 60 raw -> 30; a "light" vow is 3 raw -> 2.
+        assertEquals(30, VowSelectionService.pointsFor(VowRegistry.getById("naked_ironman")));
+        assertEquals(2, VowSelectionService.pointsFor(VowRegistry.getById("no_antipoison")));
+        for (VowDefinition v : VowRegistry.all())
+        {
+            assertTrue(VowSelectionService.pointsFor(v) >= 1, v.getId() + " must still be worth something");
+        }
+    }
+
+    @Test
+    void droppingBackBelowACheckpointUndoesTheVow(@TempDir Path tempDir) throws Exception
+    {
+        VowStorageService storage = createStorage(tempDir);
+        VowSelectionService selection = createSelectionService(storage);
+        com.vowtaker.service.TaskService tasks = createTaskService(storage, selection);
+        storage.setSelectedGod(GodAlignment.ZAMORAK);
+        storage.setCurrentRank(com.vowtaker.model.Rank.FOLLOWER);
+
+        // Cross the 25-point Follower checkpoint, which fires a pick.
+        storage.addPoints(26);
+        assertTrue(selection.checkPointsProgress());
+        assertEquals(1, storage.getHighestQuartileFired());
+
+        // Take the vow it offered.
+        selection.forceOpenSelection(VowSelectionService.DrawMode.MINOR);
+        String taken = selection.getHiddenCards().get(0).getVow().getId();
+        selection.applySelection(taken);
+        assertTrue(storage.getSwornVows().stream().anyMatch(v -> taken.equals(v.getId())));
+
+        // Fall back under the checkpoint: the vow is revoked and the checkpoint re-arms.
+        storage.subtractPoints(storage.getTotalPoints() - 20);
+        assertNotNull(selection.rollbackCheckpointIfNeeded());
+        assertEquals(0, storage.getHighestQuartileFired());
+        assertTrue(storage.getSwornVows().stream().noneMatch(v -> taken.equals(v.getId())));
+    }
+
+    @Test
+    void droppingBackBelowACheckpointWithdrawsAnUntakenPick(@TempDir Path tempDir) throws Exception
+    {
+        VowStorageService storage = createStorage(tempDir);
+        VowSelectionService selection = createSelectionService(storage);
+        storage.setSelectedGod(GodAlignment.ZAMORAK);
+        storage.setCurrentRank(com.vowtaker.model.Rank.FOLLOWER);
+
+        storage.addPoints(26);
+        assertTrue(selection.checkPointsProgress());
+        assertTrue(selection.hasPendingForcedOpen());
+
+        storage.subtractPoints(6);
+        assertNotNull(selection.rollbackCheckpointIfNeeded());
+        assertFalse(selection.hasPendingForcedOpen());
+        assertEquals(0, storage.getHighestQuartileFired());
+    }
+
+    @Test
+    void queuedPickerWaitsForTheBannerToFinish(@TempDir Path tempDir) throws Exception
+    {
+        VowStorageService storage = createStorage(tempDir);
+        VowSelectionService selection = createSelectionService(storage);
+
+        assertFalse(selection.isOpenDelayed());
+        selection.delayNextOpen(com.vowtaker.ui.VowBannerOverlay.TOTAL_MS);
+        assertTrue(selection.isOpenDelayed());
+    }
+
+    @Test
     void armourTagsNeverCatchWeapons() throws Exception
     {
         com.vowtaker.service.ItemTagRegistry tags = new com.vowtaker.service.ItemTagRegistry();

@@ -164,6 +164,14 @@ public class TaskService
         if (!storage.uncompleteTask(taskId)) return false;
         storage.subtractPoints(task.getPoints());
         announce("VowTaker: task uncompleted \u2014 " + task.getName() + " (-" + task.getPoints() + " pts)");
+
+        // Dropping back below a checkpoint must undo what that checkpoint granted, or the same
+        // points could be spent on a pick over and over.
+        String undone = selection.rollbackCheckpointIfNeeded();
+        if (undone != null)
+        {
+            announce("VowTaker: you fell back below a checkpoint \u2014 " + undone + ".");
+        }
         if (panelRefresh != null) panelRefresh.run();
         return true;
     }
@@ -275,6 +283,8 @@ public class TaskService
         storage.grantRerollToken();
         announce("VowTaker: +1 re-roll token (" + storage.getRerollTokens() + " held).");
         selection.queueMajorOpen();
+        // Hold the cards back so they don't render over the ascension banner.
+        selection.delayNextOpen(com.vowtaker.ui.VowBannerOverlay.TOTAL_MS);
         announce("VowTaker: a new major vow awaits \u2014 the picker opens once you are clear of combat.");
     }
 

@@ -39,6 +39,7 @@ public class VowSelectionService
     private boolean pendingForcedOpen;
     private DrawMode pendingDrawMode = DrawMode.BY_RANK_SEVERITY;
     private DrawMode currentDrawMode = DrawMode.BY_RANK_SEVERITY;
+    private long openNotBefore;
     private Consumer<String> onSelectionResolved;
 
     public void initialize()
@@ -181,18 +182,42 @@ public class VowSelectionService
         POINT_OVERRIDES = java.util.Collections.unmodifiableMap(m);
     }
 
-    /** Points awarded for a specific vow — applies id override if defined, otherwise severity. */
+    /**
+     * Points awarded for a specific vow. Halved (rounding up) from the raw severity/override value
+     * so a single pick is less likely to immediately cross the next checkpoint.
+     */
     public static int pointsFor(com.vowtaker.model.VowDefinition vow)
     {
         if (vow == null) return 0;
         Integer override = POINT_OVERRIDES.get(vow.getId());
-        if (override != null) return override;
-        return severityPoints(vow.getSeverity());
+        int raw = override != null ? override : severityPoints(vow.getSeverity());
+        return (raw + 1) / 2;
     }
 
     public boolean hasPendingForcedOpen()
     {
         return pendingForcedOpen;
+    }
+
+    /** Holds a queued picker back so a banner can finish playing before the cards appear. */
+    public void delayNextOpen(long millis)
+    {
+        openNotBefore = System.currentTimeMillis() + millis;
+    }
+
+    public boolean isOpenDelayed()
+    {
+        return System.currentTimeMillis() < openNotBefore;
+    }
+
+    /** Closes an open or queued picker without swearing anything. */
+    public void cancelPendingPick()
+    {
+        hiddenCards.clear();
+        selectionPending = false;
+        pendingForcedOpen = false;
+        pendingDrawMode = DrawMode.BY_RANK_SEVERITY;
+        storageService.setSelectionOpen(false);
     }
 
     public void clearPendingForcedOpen()
@@ -375,18 +400,7 @@ public class VowSelectionService
         if (span <= 0) return false;
 
         int gained = Math.max(0, storageService.getTotalPoints() - floor);
-        int quartile;
-        if (current == Rank.FOLLOWER)
-        {
-            // Follower rank-up span is only 50 pts; a single reward can otherwise cross multiple
-            // quartiles at once. One fixed mid-rank checkpoint at 25 pts keeps early vows spaced out.
-            quartile = gained >= 25 ? 1 : 0;
-        }
-        else
-        {
-            // Quartiles 1, 2, 3 fire between ranks; quartile 4 is the milestone/rank-up itself.
-            quartile = Math.min(3, (gained * 4) / span);
-        }
+        int quartile = quartileFor(current, gained, span);
         int already = storageService.getHighestQuartileFired();
         if (quartile > already && quartile >= 1 && quartile <= 3)
         {
@@ -395,6 +409,76 @@ public class VowSelectionService
             return true;
         }
         return false;
+    }
+
+    /** Follower uses a single fixed 25-point step; higher ranks use quarters of the rank-up bar. */
+    private static int quartileFor(Rank current, int gained, int span)
+    {
+        if (current == Rank.FOLLOWER)
+        {
+            return gained >= 25 ? 1 : 0;
+        }
+        return Math.min(3, (gained * 4) / span);
+    }
+
+    /**
+     * Undoes a checkpoint the player has dropped back below, so an accidental task tick-off can't
+     * be used to farm extra picks. Cancels a still-open picker, or revokes the vow already taken.
+     *
+     * @return description of what was undone, or null if nothing needed undoing
+     */
+    public String rollbackCheckpointIfNeeded()
+    {
+        StringBuilder undone = new StringBuilder();
+        // Revoking a vow refunds its points, which can drop another checkpoint; settle the chain.
+        for (int guard = 0; guard < 4; guard++)
+        {
+            Rank current = storageService.getCurrentRank();
+            Rank next = current.next();
+            if (current == Rank.NONE || next == current) break;
+
+            int floor = current.getRequiredPoints();
+            int span = next.getRequiredPoints() - floor;
+            if (span <= 0) break;
+
+            int gained = Math.max(0, storageService.getTotalPoints() - floor);
+            int nowQuartile = quartileFor(current, gained, span);
+            int fired = storageService.getHighestQuartileFired();
+            if (nowQuartile >= fired) break;
+
+            storageService.setHighestQuartileFired(nowQuartile);
+
+            if (selectionPending || pendingForcedOpen)
+            {
+                cancelPendingPick();
+                append(undone, "the pending vow choice was withdrawn");
+                break;
+            }
+
+            VowDefinition revoked = revokeLastVow();
+            if (revoked == null) break;
+            append(undone, "\"" + revoked.getName() + "\" was un-sworn");
+        }
+        return undone.length() == 0 ? null : undone.toString();
+    }
+
+    private static void append(StringBuilder sb, String s)
+    {
+        if (sb.length() > 0) sb.append(" and ");
+        sb.append(s);
+    }
+
+    /** Un-swears the most recent vow and refunds the points it granted. */
+    private VowDefinition revokeLastVow()
+    {
+        String id = storageService.getLastSwornVowId();
+        if (id == null) return null;
+        VowDefinition vow = VowRegistry.getById(id);
+        if (vow == null) return null;
+
+        storageService.uncompleteVow(vow);
+        storageService.subtractPoints(pointsFor(vow));
+        return vow;
     }
 
     public void pollSelection()
@@ -447,6 +531,10 @@ public class VowSelectionService
         selectionPending = false;
         storageService.setSelectionOpen(false);
         hiddenCards.clear();
+        if (!ritualPending)
+        {
+            storageService.setLastSwornVowId(vow.getId());
+        }
 
         if (onSelectionResolved != null)
         {

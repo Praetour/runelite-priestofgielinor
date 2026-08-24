@@ -24,7 +24,8 @@ public class VowBannerOverlay extends Overlay
     private static final long FADE_IN_MS = 450;
     private static final long HOLD_MS = 3000;
     private static final long FADE_OUT_MS = 1100;
-    private static final long TOTAL_MS = FADE_IN_MS + HOLD_MS + FADE_OUT_MS;
+    /** Full lifetime of a banner. Callers delay follow-up UI by this so it isn't drawn over. */
+    public static final long TOTAL_MS = FADE_IN_MS + HOLD_MS + FADE_OUT_MS;
 
     private final Client client;
 

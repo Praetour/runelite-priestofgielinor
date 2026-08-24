@@ -47,6 +47,8 @@ public class VowStorageService
     // Set when a milestone task is completed; consumed by the next resolved card pick to promote.
     private boolean pendingPromotion;
     private int rerollTokens = 1;
+    // Most recent non-ritual vow, so an accidental task tick-off can be undone cleanly.
+    private String lastSwornVowId;
     private String sessionKey = "local";
     private String adoptedLegacySave;
     private GodAlignment selectedGod = GodAlignment.NONE;
@@ -245,6 +247,10 @@ public class VowStorageService
                         retiredMajorVows.add(element.getAsString());
                     }
                 }
+                if (root.has("lastSwornVowId"))
+                {
+                    lastSwornVowId = root.get("lastSwornVowId").getAsString();
+                }
             }
             if (!approvalsInitialized)
             {
@@ -294,6 +300,10 @@ public class VowStorageService
             root.addProperty("pendingPromotion", pendingPromotion);
             root.addProperty("rerollTokens", rerollTokens);
             root.add("retiredMajorVows", toJsonArray(retiredMajorVows));
+            if (lastSwornVowId != null)
+            {
+                root.addProperty("lastSwornVowId", lastSwornVowId);
+            }
 
             try (FileWriter writer = new FileWriter(file))
             {
@@ -388,6 +398,7 @@ public class VowStorageService
         pendingPromotion = false;
         rerollTokens = 1;
         retiredMajorVows.clear();
+        lastSwornVowId = null;
         unlockedGearPatterns.clear();
         seedDefaultApprovals();
         save();
@@ -679,6 +690,30 @@ public class VowStorageService
         {
             activePermanentVow = incoming;
         }
+        save();
+    }
+
+    public String getLastSwornVowId()
+    {
+        return lastSwornVowId;
+    }
+
+    public void setLastSwornVowId(String vowId)
+    {
+        this.lastSwornVowId = vowId;
+        save();
+    }
+
+    /** Un-swears a vow so it is neither enforced nor excluded from future draws. */
+    public void uncompleteVow(VowDefinition vow)
+    {
+        if (vow == null) return;
+        completedPermanentVows.remove(vow.getId());
+        completedGodVows.remove(vow.getId());
+        completedRitualVows.remove(vow.getId());
+        if (activeGodVow != null && activeGodVow.getId().equals(vow.getId())) activeGodVow = null;
+        if (activePermanentVow != null && activePermanentVow.getId().equals(vow.getId())) activePermanentVow = null;
+        if (vow.getId().equals(lastSwornVowId)) lastSwornVowId = null;
         save();
     }
 

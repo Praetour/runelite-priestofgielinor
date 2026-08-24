@@ -160,25 +160,15 @@ public class VowTakerPlugin extends Plugin
             storageService.setSelectedGod(g);
             panel.refresh();
             clientThread.invoke(() -> {
+                String godName = g.name().charAt(0) + g.name().substring(1).toLowerCase();
+                bannerOverlay.show("SWORN TO " + g.name(),
+                    "You have chosen to devote yourself to " + godName);
                 client.addChatMessage(net.runelite.api.ChatMessageType.GAMEMESSAGE, "",
-                    "VowTaker: sworn to " + g.name() + ". Drawing your first god-bound vow...", null);
+                    "VowTaker: sworn to " + godName + ". Your first god-bound vow approaches...", null);
+
+                // Queue rather than open, so the banner plays before the cards appear.
                 selectionService.queueForcedGodOnlyOpen();
-                requestSelectionOpen();
-                if (selectionService.hasPendingSelection())
-                {
-                    // ok
-                }
-                else if (selectionService.hasPendingForcedOpen())
-                {
-                    client.addChatMessage(net.runelite.api.ChatMessageType.GAMEMESSAGE, "",
-                        "VowTaker: card picker queued \u2014 waiting for you to leave the instance / disengage.", null);
-                }
-                else
-                {
-                    int approved = storageService.getApprovedVowIds().size();
-                    client.addChatMessage(net.runelite.api.ChatMessageType.GAMEMESSAGE, "",
-                        "VowTaker: no eligible vows to draw (approved=" + approved + "). Try !vow reset or check tasks.json.", null);
-                }
+                selectionService.delayNextOpen(com.vowtaker.ui.VowBannerOverlay.TOTAL_MS);
             });
         });
         panel.setVowSelectedCallback(vowId -> {
@@ -293,7 +283,8 @@ public class VowTakerPlugin extends Plugin
 
         // Safety gate: if we owe the player a card pick but they're in an instance (Inferno, raid, Fight Caves)
         // or actively interacting with something, defer until they leave / disengage.
-        if (selectionService.hasPendingForcedOpen() && !selectionService.hasPendingSelection() && !inSensitiveArea())
+        if (selectionService.hasPendingForcedOpen() && !selectionService.hasPendingSelection()
+            && !selectionService.isOpenDelayed() && !inSensitiveArea())
         {
             selectionService.forceOpenSelection();
             if (selectionService.hasPendingSelection())
