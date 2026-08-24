@@ -1,0 +1,8 @@
+D:\Unreal\Projects\RS Plugins\VowTaker\shim\bin\Release\net48\RuneLite.exe.config
+D:\Unreal\Projects\RS Plugins\VowTaker\shim\bin\Release\net48\RuneLite.exe
+D:\Unreal\Projects\RS Plugins\VowTaker\shim\obj\Release\net48\VowTakerShim.csproj.AssemblyReference.cache
+D:\Unreal\Projects\RS Plugins\VowTaker\shim\obj\Release\net48\VowTakerShim.GeneratedMSBuildEditorConfig.editorconfig
+D:\Unreal\Projects\RS Plugins\VowTaker\shim\obj\Release\net48\VowTakerShim.AssemblyInfoInputs.cache
+D:\Unreal\Projects\RS Plugins\VowTaker\shim\obj\Release\net48\VowTakerShim.AssemblyInfo.cs
+D:\Unreal\Projects\RS Plugins\VowTaker\shim\obj\Release\net48\VowTakerShim.csproj.CoreCompileInputs.cache
+D:\Unreal\Projects\RS Plugins\VowTaker\shim\obj\Release\net48\RuneLite.exe

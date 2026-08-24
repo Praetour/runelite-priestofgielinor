@@ -189,7 +189,7 @@ public class VowTakerUpdater
             if (!response.isSuccessful() || response.body() == null) return null;
             try (InputStreamReader reader = new InputStreamReader(response.body().byteStream(), StandardCharsets.UTF_8))
             {
-                return JsonParser.parseReader(reader).getAsJsonObject();
+                return new JsonParser().parse(reader).getAsJsonObject();
             }
         }
         catch (RuntimeException e)

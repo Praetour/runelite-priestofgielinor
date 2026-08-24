@@ -170,7 +170,7 @@ public class ItemTagRegistry
             }
             try (Reader r = new InputStreamReader(in, StandardCharsets.UTF_8))
             {
-                return JsonParser.parseReader(r).getAsJsonObject();
+                return new JsonParser().parse(r).getAsJsonObject();
             }
         }
         catch (Exception e)
@@ -184,7 +184,7 @@ public class ItemTagRegistry
     {
         try (Reader r = Files.newBufferedReader(file, StandardCharsets.UTF_8))
         {
-            return JsonParser.parseReader(r).getAsJsonObject();
+            return new JsonParser().parse(r).getAsJsonObject();
         }
         catch (Exception e)
         {

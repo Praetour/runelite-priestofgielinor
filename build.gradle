@@ -14,15 +14,17 @@ repositories {
 }
 
 def runeLiteVersion = 'latest.release'
+// Must match the Gson the client ships, or newer APIs compile then fail at runtime.
+def gsonVersion = '2.8.5'
 
 dependencies {
     compileOnly group: 'net.runelite', name: 'client', version: runeLiteVersion
-    compileOnly group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+    compileOnly group: 'com.google.code.gson', name: 'gson', version: gsonVersion
     compileOnly 'javax.inject:javax.inject:1'
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
     testImplementation group: 'net.runelite', name: 'client', version: runeLiteVersion
-    testImplementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+    testImplementation group: 'com.google.code.gson', name: 'gson', version: gsonVersion
     testImplementation platform('org.junit:junit-bom:5.10.2')
     testImplementation 'org.junit.jupiter:junit-jupiter'
 }

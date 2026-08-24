@@ -63,7 +63,7 @@ public final class TaskRegistry
         int applied = 0;
         try (FileReader reader = new FileReader(file.toFile()))
         {
-            JsonElement root = JsonParser.parseReader(reader);
+            JsonElement root = new JsonParser().parse(reader);
             if (!root.isJsonObject())
             {
                 return 0;

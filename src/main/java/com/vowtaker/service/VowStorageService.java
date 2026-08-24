@@ -180,7 +180,7 @@ public class VowStorageService
 
             try (FileReader reader = new FileReader(file))
             {
-                JsonObject root = JsonParser.parseReader(reader).getAsJsonObject();
+                JsonObject root = new JsonParser().parse(reader).getAsJsonObject();
                 if (root.has("selectedGod"))
                 {
                     selectedGod = GodAlignment.valueOf(root.get("selectedGod").getAsString());

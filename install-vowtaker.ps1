@@ -50,6 +50,17 @@ if (-not $jar) {
 Write-Step "Found jar: $($jar.Name)"
 
 # --- Locate RuneLite ------------------------------------------------------
+# --- Locate RuneLite ------------------------------------------------------
+function Find-RuneLiteExe {
+    $candidates = @(
+        (Join-Path $env:LOCALAPPDATA 'RuneLite\RuneLite.exe'),
+        (Join-Path ${env:ProgramFiles} 'RuneLite\RuneLite.exe'),
+        (Join-Path ${env:ProgramFiles(x86)} 'RuneLite\RuneLite.exe')
+    )
+    foreach ($c in $candidates) { if ($c -and (Test-Path $c)) { return $c } }
+    return $null
+}
+
 $runeliteDir = Join-Path $env:USERPROFILE '.runelite'
 if (-not (Test-Path $runeliteDir)) {
     Write-Error "RuneLite folder not found at '$runeliteDir'. Install and launch RuneLite once, then re-run this script."
@@ -87,6 +98,39 @@ if (Test-Path $tagsTarget) {
     Write-Ok "Seeded blocklist -> $tagsTarget"
 } else {
     Write-Step "No item-tags.json alongside the jar; the plugin will create one on first launch."
+}
+
+# --- Install the launcher shim -------------------------------------------
+# RuneLite has no sideloading mechanism, so a local jar can only be loaded by being on the
+# classpath at startup. The shim stands in for RuneLite.exe, replays the launcher's own java
+# command with our jar appended, and falls back to the real launcher if anything looks wrong.
+$shimSource = Get-ChildItem -Path $SourceDir -Filter 'RuneLite.exe' -File -ErrorAction SilentlyContinue |
+              Select-Object -First 1
+
+if ($shimSource) {
+    $rlDir = Split-Path -Parent (Find-RuneLiteExe)
+    if (-not $rlDir) {
+        Write-Warn "Could not find RuneLite.exe - skipping launcher shim. The plugin will not load."
+    } else {
+        $live     = Join-Path $rlDir 'RuneLite.exe'
+        $original = Join-Path $rlDir 'RuneLite-original.exe'
+
+        # Only displace the real launcher once. Re-running must never overwrite the backup
+        # with the shim, or the fallback path is destroyed.
+        if (-not (Test-Path $original)) {
+            Move-Item $live $original -Force
+            Write-Ok "Backed up launcher -> RuneLite-original.exe"
+        } else {
+            Write-Step "Launcher already backed up; refreshing shim only."
+        }
+
+        Copy-Item $shimSource.FullName $live -Force
+        $shimConfig = Join-Path $SourceDir 'RuneLite.exe.config'
+        if (Test-Path $shimConfig) { Copy-Item $shimConfig (Join-Path $rlDir 'RuneLite.exe.config') -Force }
+        Write-Ok "Installed launcher shim -> $live"
+    }
+} else {
+    Write-Step "No shim bundled; skipping launcher step."
 }
 
 # --- Done -----------------------------------------------------------------
