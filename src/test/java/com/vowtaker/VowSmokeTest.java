@@ -334,6 +334,52 @@ class VowSmokeTest
     }
 
     @Test
+    void everyVowIsActuallyEnforced() throws Exception
+    {
+        com.vowtaker.service.ItemTagRegistry tags = new com.vowtaker.service.ItemTagRegistry();
+        java.lang.reflect.Method setter = com.vowtaker.service.ItemTagRegistry.class
+            .getDeclaredMethod("setDirectoryOverride", Path.class);
+        setter.setAccessible(true);
+        setter.invoke(tags, java.nio.file.Files.createTempDirectory("vowtags3"));
+        tags.initialize();
+
+        java.util.List<String> inert = new java.util.ArrayList<>();
+        for (VowDefinition vow : VowRegistry.all())
+        {
+            // Rituals are location objectives, not menu restrictions.
+            if (vow.getType() == VowType.RITUAL) continue;
+
+            boolean hasTag = !vow.getBlockedTags().isEmpty();
+            boolean hasRule = com.vowtaker.service.VowEnforcementService.RULE_ENFORCED_IDS.contains(vow.getId());
+            if (!hasTag && !hasRule) inert.add(vow.getId());
+        }
+
+        assertTrue(inert.isEmpty(), "vows with no enforcement at all: " + inert);
+    }
+
+    @Test
+    void spellcastVowsMatchTheCastOptionNotTheSpellName() throws Exception
+    {
+        com.vowtaker.service.ItemTagRegistry tags = new com.vowtaker.service.ItemTagRegistry();
+        java.lang.reflect.Method setter = com.vowtaker.service.ItemTagRegistry.class
+            .getDeclaredMethod("setDirectoryOverride", Path.class);
+        setter.setAccessible(true);
+        setter.invoke(tags, java.nio.file.Files.createTempDirectory("vowtags4"));
+        tags.initialize();
+
+        // A spellbook cast is option="Cast", target="Teleport to House".
+        assertTrue(tags.blocks("travel_poh", "cast", "Teleport to House"));
+        assertTrue(tags.blocks("travel_poh", "break", "House teleport"));
+        assertTrue(tags.blocks("travel_poh", "teleport", "Mounted glory"));
+        assertFalse(tags.blocks("travel_poh", "cast", "Varrock Teleport"));
+
+        // Prayer targets are the bare prayer name.
+        assertTrue(tags.blocks("prayer_any", "activate", "Protect from Melee"));
+        assertTrue(tags.blocks("prayer_any", "activate", "Piety"));
+        assertFalse(tags.blocks("prayer_any", "wear", "Piety"));
+    }
+
+    @Test
     void noVowIsOfferedBeforeAGodIsChosen(@TempDir Path tempDir) throws Exception
     {
         VowStorageService storage = createStorage(tempDir);

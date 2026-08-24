@@ -237,6 +237,31 @@
       "names": ["spirit tree"],
       "exclude": []
     },
+    "travel_poh": {
+      "_note": "Spellbook casts put the spell name in the TARGET and 'Cast' in the option, so 'cast' must be listed here.",
+      "options": ["cast", "teleport", "rub", "break", "use", "enter", "friend's house", "home"],
+      "names": [
+        "teleport to house", "house teleport", "teleport house", "poh",
+        "mounted glory", "mounted digsite", "mounted xeric", "mounted mythical",
+        "mounted amulet", "construction cape", "construct. cape", "portal nexus",
+        "amulet of glory (mounted)"
+      ],
+      "exclude": []
+    },
+    "prayer_any": {
+      "_note": "Prayer menu targets are the plain prayer name, so every prayer must be listed.",
+      "options": ["activate", "deactivate"],
+      "names": [
+        "thick skin", "burst of strength", "clarity of thought", "sharp eye", "mystic will",
+        "rock skin", "superhuman strength", "improved reflexes", "rapid restore", "rapid heal",
+        "protect item", "hawk eye", "mystic lore", "steel skin", "ultimate strength",
+        "incredible reflexes", "protect from magic", "protect from missiles", "protect from melee",
+        "eagle eye", "mystic might", "retribution", "redemption", "smite", "preserve",
+        "chivalry", "piety", "rigour", "augury", "deadeye", "mystic vigour", "ruinous",
+        "rp recovery", "ancient prayer"
+      ],
+      "exclude": []
+    },
 
     "spec_attack": {
       "options": ["use"],

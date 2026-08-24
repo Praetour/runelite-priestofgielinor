@@ -319,6 +319,20 @@ public class VowEnforcementService
         return null;
     }
 
+    /**
+     * Vow ids enforced by a behaviour rule rather than an item tag. Kept in sync with
+     * {@link #blocksByRule}; a test asserts every vow is covered by one or the other, so a new
+     * vow can never end up silently unenforced.
+     */
+    public static final Set<String> RULE_ENFORCED_IDS = java.util.Collections.unmodifiableSet(
+        new java.util.HashSet<>(java.util.Arrays.asList(
+            "no_teleport_spells", "no_damage_boosting_prayers",
+            "mark_of_blood", "keeper_of_balance", "apostle_zamorak", "apostle_saradomin",
+            "shieldbearer_of_light", "chaos_tethered", "skybound", "apostle_armadyl",
+            "apostle_guthix", "apostle_bandos", "shadow_marked", "equilibrium_seeker",
+            "apostle_zaros", "berserker_of_bandos", "windwalker", "brute_of_bandos",
+            "fatebound")));
+
     /** Per-vow behaviour rules that can't be expressed as an item tag. */
     private boolean blocksByRule(VowDefinition vow, String option, String target)
     {
@@ -327,10 +341,6 @@ public class VowEnforcementService
             // Travel and prayer restrictions.
             case "no_teleport_spells":
                 return isTeleportSpellCast(option, target);
-            case "no_poh_teleports":
-                return isPohTeleport(option, target);
-            case "no_prayer_book":
-                return isPrayerAction(option, target);
             case "no_damage_boosting_prayers":
                 return option.equals("activate") && isDamagePrayerName(target);
 
@@ -507,11 +517,6 @@ public class VowEnforcementService
         return option.equals("wear") || option.equals("wield") || option.equals("equip");
     }
 
-    private static boolean isPrayerAction(String option, String target)
-    {
-        return (option.equals("activate") || option.equals("deactivate")) && (target.contains("prayer") || target.contains("bury") || target.contains("altar"));
-    }
-
     /** Loose match on item name for slot-restriction vows. */
     private static boolean matchesSlot(String target, String slot)
     {
@@ -597,11 +602,6 @@ public class VowEnforcementService
         if (option.equals("teleport")) return true;
         if ((option.equals("rub") || option.equals("break")) && target.contains("teleport")) return true;
         return false;
-    }
-
-    private static boolean isPohTeleport(String option, String target)
-    {
-        return option.contains("teleport") && (target.contains("house") || target.contains("home") || target.contains("mounted"));
     }
 
     public void onWidgetLoaded(WidgetLoaded event)

@@ -179,7 +179,7 @@ public final class VowRegistry
         add(map, new VowDefinition("no_teleport_items", "No Teleport Items", "Teleport jewellery, tabs and scrolls are forbidden.", VowType.PERMANENT, GodAlignment.NONE, "utility", "milestone", "hard", true, tags("travel_teleport_item")));
         add(map, new VowDefinition("no_fairy_rings", "No Fairy Rings", "Fairy ring travel is forbidden.", VowType.PERMANENT, GodAlignment.NONE, "utility", "milestone", "medium", true, tags("travel_fairy_ring")));
         add(map, new VowDefinition("no_spirit_trees", "No Spirit Trees", "Spirit tree travel is forbidden.", VowType.PERMANENT, GodAlignment.NONE, "utility", "milestone", "medium", true, tags("travel_spirit_tree")));
-        add(map, new VowDefinition("no_poh_teleports", "No POH Teleports", "House teleport actions are blocked.", VowType.PERMANENT, GodAlignment.NONE, "utility", "milestone", "medium", true));
+        add(map, new VowDefinition("no_poh_teleports", "No POH Teleports", "House teleports, portal nexus and mounted jewellery are forbidden.", VowType.PERMANENT, GodAlignment.NONE, "utility", "milestone", "medium", true, tags("travel_poh")));
     }
 
     private static void seedConsumableVows(Map<String, VowDefinition> map)
@@ -200,7 +200,7 @@ public final class VowRegistry
         add(map, new VowDefinition("no_ranged_training", "No Ranged Weapons", "You may not equip ranged weaponry.", VowType.PERMANENT, GodAlignment.NONE, "combat", "milestone", "hard", true, tags("weapon_ranged")));
         add(map, new VowDefinition("no_magic_training", "No Magic Weapons", "You may not equip staves, wands or tridents.", VowType.PERMANENT, GodAlignment.NONE, "combat", "milestone", "hard", true, tags("weapon_magic")));
         // Not default-approved: blanket prayer denial locks most boss content.
-        add(map, new VowDefinition("no_prayer_book", "No Prayer Book", "Prayer use is suppressed entirely.", VowType.PERMANENT, GodAlignment.NONE, "prayer", "milestone", "hard", false));
+        add(map, new VowDefinition("no_prayer_book", "No Prayer Book", "Prayer use is suppressed entirely.", VowType.PERMANENT, GodAlignment.NONE, "prayer", "milestone", "hard", false, tags("prayer_any")));
     }
 
     // ================== MAJOR: armour tier caps ==================
