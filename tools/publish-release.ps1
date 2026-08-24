@@ -47,7 +47,8 @@ $buildFile = Join-Path $projectDir 'build.gradle'
 $buildText = Get-Content $buildFile -Raw
 if ($buildText -notmatch "(?m)^version\s*=\s*'$([regex]::Escape($Version))'") {
     $buildText = $buildText -replace "(?m)^version\s*=\s*'[^']*'", "version = '$Version'"
-    Set-Content $buildFile $buildText -Encoding UTF8 -NoNewline
+    # BOM-less: Gradle cannot parse a build script that starts with one.
+    [IO.File]::WriteAllText($buildFile, $buildText, (New-Object Text.UTF8Encoding $false))
     Write-Step "Set build.gradle version to $Version"
 }
 
@@ -56,7 +57,7 @@ $propsFile = Join-Path $projectDir 'src\main\resources\runelite-plugin.propertie
 if (Test-Path $propsFile) {
     $props = Get-Content $propsFile -Raw
     $props = $props -replace "(?m)^version=.*$", "version=$Version"
-    Set-Content $propsFile $props -Encoding UTF8 -NoNewline
+    [IO.File]::WriteAllText($propsFile, $props, (New-Object Text.UTF8Encoding $false))
     Write-Step "Set runelite-plugin.properties version to $Version"
 }
 
@@ -65,11 +66,10 @@ if (-not $NoBuild) {
     Write-Step "Building..."
     Push-Location $projectDir
     try {
-        & $gradle --console=plain --no-daemon build 2>&1 | Out-String | Write-Verbose
-        if ($LASTEXITCODE -ne 0 -and $LASTEXITCODE -ne $null) {
-            # Gradle on Windows can report a non-zero code even on success; trust the jar instead.
-            Write-Verbose "Gradle exit code $LASTEXITCODE"
-        }
+        # Gradle writes progress to stderr, so redirect it away rather than tripping $ErrorActionPreference.
+        $ErrorActionPreference = 'Continue'
+        & $gradle --console=plain --no-daemon build 2>&1 | Out-String -Stream | Where-Object { $_ -match 'BUILD|error:' } | Write-Host
+        $ErrorActionPreference = 'Stop'
     } finally {
         Pop-Location
     }
